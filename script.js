@@ -1,3 +1,4 @@
+alert("SCRIPT WERKT");
 ```javascript
 "use strict";
 
