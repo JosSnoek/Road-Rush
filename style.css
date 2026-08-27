@@ -24,23 +24,21 @@ body {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
-  padding-bottom: 10px;
 }
 
 #topbar {
-  width: 100%;
   min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  padding: 8px;
+  padding: 7px;
 }
 
 #score,
 #level,
 #lives {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -48,7 +46,6 @@ body {
 #pauseButton {
   width: 44px;
   height: 44px;
-  padding: 0;
   border: 0;
   border-radius: 10px;
   background: white;
@@ -68,7 +65,6 @@ body {
 
 #controls {
   display: flex;
-  width: 100%;
   gap: 12px;
   padding: 14px 8px 8px;
 }
@@ -82,7 +78,6 @@ body {
   color: black;
   font-size: 40px;
   font-weight: bold;
-  cursor: pointer;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
@@ -95,31 +90,27 @@ body {
 }
 
 #help {
-  margin: 5px 8px 0;
   color: #aaa;
   font-size: 12px;
+  padding: 0 5px 10px;
 }
 
 @media (max-width: 420px) {
 
-  #game {
-    max-width: 100%;
-  }
-
   #topbar {
     min-height: 52px;
-    padding: 5px 7px;
+    padding: 5px 6px;
   }
 
   #score,
   #level,
   #lives {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   #pauseButton {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     font-size: 19px;
   }
 
