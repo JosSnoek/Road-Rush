@@ -1,87 +1,322 @@
 <!DOCTYPE html>
 <html lang="nl">
-
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Road Rush</title>
 
-  <link rel="stylesheet" href="./style.css">
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    #game {
+      width: 400px;
+      max-width: 100%;
+      margin: auto;
+    }
+
+    #top {
+      height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-weight: bold;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 3px solid white;
+    }
+
+    #buttons {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+    }
+
+    button {
+      flex: 1;
+      height: 70px;
+      font-size: 40px;
+      border: 0;
+      border-radius: 15px;
+    }
+  </style>
 </head>
 
 <body>
 
-  <div id="game">
+<div id="game">
 
-    <div id="topbar">
-      <div id="score">Score: 0</div>
-      <div id="level">Level: 1</div>
-      <div id="lives">❤️ ❤️ ❤️</div>
+  <div id="top">
 
-      <button id="pauseButton">
-        ⏸️
-      </button>
-    </div>
+    <span id="score">
+      Score: 0
+    </span>
 
-    <canvas
-      id="canvas"
-      width="400"
-      height="600">
-    </canvas>
+    <span id="level">
+      Level: 1
+    </span>
 
-    <div id="controls">
-
-      <button id="leftButton">
-        ⬅️
-      </button>
-
-      <button id="rightButton">
-        ➡️
-      </button>
-
-    </div>
-
-    <p id="help">
-      PC: ← → of A / D |
-      Telefoon: gebruik de knoppen
-    </p>
+    <span id="lives">
+      ❤️❤️❤️
+    </span>
 
   </div>
 
+  <canvas
+    id="canvas"
+    width="400"
+    height="600">
+  </canvas>
 
-  <!-- TEST -->
-  <script>
+  <div id="buttons">
 
-    alert("GAME JAVASCRIPT WERKT!");
+    <button id="left">
+      ⬅️
+    </button>
 
-    const canvas =
-      document.getElementById("canvas");
+    <button id="right">
+      ➡️
+    </button>
 
-    const ctx =
-      canvas.getContext("2d");
+  </div>
 
-    // Testtekening
-    ctx.fillStyle = "#333";
+</div>
 
-    ctx.fillRect(
-      35,
-      0,
-      330,
-      600
-    );
 
-    ctx.fillStyle = "white";
+<script>
 
-    ctx.fillRect(
-      195,
-      0,
-      10,
-      600
-    );
+const canvas =
+  document.getElementById("canvas");
 
-  </script>
+const ctx =
+  canvas.getContext("2d");
+
+const player = {
+
+  x: 180,
+
+  y: 500,
+
+  width: 40,
+
+  height: 70,
+
+  speed: 6
+
+};
+
+
+let left = false;
+let right = false;
+
+
+// TELEFOON
+
+document
+  .getElementById("left")
+  .addEventListener("pointerdown", () => {
+
+    left = true;
+
+  });
+
+document
+  .getElementById("left")
+  .addEventListener("pointerup", () => {
+
+    left = false;
+
+  });
+
+
+document
+  .getElementById("right")
+  .addEventListener("pointerdown", () => {
+
+    right = true;
+
+  });
+
+document
+  .getElementById("right")
+  .addEventListener("pointerup", () => {
+
+    right = false;
+
+  });
+
+
+// PC
+
+document.addEventListener("keydown", event => {
+
+  if (
+    event.key === "ArrowLeft" ||
+    event.key.toLowerCase() === "a"
+  ) {
+
+    left = true;
+
+  }
+
+  if (
+    event.key === "ArrowRight" ||
+    event.key.toLowerCase() === "d"
+  ) {
+
+    right = true;
+
+  }
+
+});
+
+
+document.addEventListener("keyup", event => {
+
+  if (
+    event.key === "ArrowLeft" ||
+    event.key.toLowerCase() === "a"
+  ) {
+
+    left = false;
+
+  }
+
+  if (
+    event.key === "ArrowRight" ||
+    event.key.toLowerCase() === "d"
+  ) {
+
+    right = false;
+
+  }
+
+});
+
+
+// TEKENEN
+
+function draw() {
+
+  // GROENE ACHTERGROND
+
+  ctx.fillStyle = "#198a35";
+
+  ctx.fillRect(
+    0,
+    0,
+    400,
+    600
+  );
+
+
+  // WEG
+
+  ctx.fillStyle = "#333";
+
+  ctx.fillRect(
+    35,
+    0,
+    330,
+    600
+  );
+
+
+  // MIDDENSTREEP
+
+  ctx.fillStyle = "white";
+
+  ctx.fillRect(
+    195,
+    0,
+    10,
+    600
+  );
+
+
+  // AUTO
+
+  ctx.fillStyle = "#00e676";
+
+  ctx.fillRect(
+    player.x,
+    player.y,
+    player.width,
+    player.height
+  );
+
+
+  // VOORRUIT
+
+  ctx.fillStyle = "#111";
+
+  ctx.fillRect(
+    player.x + 7,
+    player.y + 10,
+    26,
+    20
+  );
+
+}
+
+
+// UPDATE
+
+function update() {
+
+  if (left) {
+
+    player.x -= player.speed;
+
+  }
+
+  if (right) {
+
+    player.x += player.speed;
+
+  }
+
+
+  if (player.x < 45) {
+
+    player.x = 45;
+
+  }
+
+  if (player.x > 315) {
+
+    player.x = 315;
+
+  }
+
+}
+
+
+// LOOP
+
+function gameLoop() {
+
+  update();
+
+  draw();
+
+  requestAnimationFrame(gameLoop);
+
+}
+
+
+gameLoop();
+
+</script>
 
 </body>
 </html>
