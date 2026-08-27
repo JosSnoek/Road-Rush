@@ -1,125 +1,612 @@
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
-body {
-  margin: 0;
-  background: #111;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  overflow: hidden;
-  touch-action: none;
-}
+const scoreElement = document.getElementById("score");
+const livesElement = document.getElementById("lives");
+const pauseButton = document.getElementById("pauseButton");
 
-#game {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 auto;
-}
+const leftButton = document.getElementById("leftButton");
+const rightButton = document.getElementById("rightButton");
 
-#topbar {
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 5px 10px;
-  position: relative;
-  z-index: 2;
-}
+let score = 0;
+let lives = 3;
+let gameOver = false;
+let paused = false;
 
-#score {
-  font-size: 25px;
-  font-weight: bold;
-}
+const keys = {};
 
-#lives {
-  font-size: 24px;
-  white-space: nowrap;
-}
+const player = {
+  x: 180,
+  y: 500,
+  width: 40,
+  height: 70,
+  speed: 6
+};
 
-#pauseButton {
-  width: 50px;
-  height: 45px;
-  font-size: 24px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  background: white;
-  padding: 0;
-}
+let enemies = [];
+let spawnTimer = 0;
+let roadOffset = 0;
 
-#pauseButton:active {
-  transform: scale(0.92);
-}
 
-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: green;
-  border: 3px solid white;
-  border-radius: 5px;
-}
+// =========================
+// PC BESTURING
+// =========================
 
-#controls {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 15px 20px;
-}
+document.addEventListener("keydown", function(e) {
 
-#controls button {
-  width: 150px;
-  height: 70px;
-  font-size: 38px;
-  border: none;
-  border-radius: 15px;
-  background: white;
-  cursor: pointer;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
+  keys[e.key.toLowerCase()] = true;
 
-#controls button:active {
-  transform: scale(0.92);
-  background: #ccc;
-}
+  if (e.code === "Space") {
 
-/* TELEFOON */
-@media (max-width: 420px) {
+    e.preventDefault();
 
-  #topbar {
-    height: 55px;
-    padding: 5px 12px;
-    transform: translateY(15px);
+    togglePause();
+
   }
 
-  #score {
-    font-size: 21px;
+});
+
+document.addEventListener("keyup", function(e) {
+
+  keys[e.key.toLowerCase()] = false;
+
+});
+
+
+// =========================
+// PAUZE
+// =========================
+
+pauseButton.addEventListener("click", togglePause);
+
+function togglePause() {
+
+  if (gameOver) {
+    return;
   }
 
-  #lives {
-    font-size: 20px;
+  paused = !paused;
+
+  if (paused) {
+
+    pauseButton.textContent = "▶️";
+
+  } else {
+
+    pauseButton.textContent = "⏸️";
+
   }
 
-  #pauseButton {
-    width: 48px;
-    height: 43px;
-    font-size: 22px;
-  }
-
-  #controls {
-    padding: 10px;
-    gap: 10px;
-    transform: translateY(-25px);
-  }
-
-  #controls button {
-    width: 45%;
-    height: 65px;
-    font-size: 38px;
-  }
 }
+
+
+// =========================
+// TELEFOON BESTURING
+// =========================
+
+function startLeft(e) {
+
+  e.preventDefault();
+
+  keys["mobileleft"] = true;
+
+}
+
+function stopLeft(e) {
+
+  e.preventDefault();
+
+  keys["mobileleft"] = false;
+
+}
+
+function startRight(e) {
+
+  e.preventDefault();
+
+  keys["mobileright"] = true;
+
+}
+
+function stopRight(e) {
+
+  e.preventDefault();
+
+  keys["mobileright"] = false;
+
+}
+
+
+// Linker knop
+leftButton.addEventListener("touchstart", startLeft, {
+  passive: false
+});
+
+leftButton.addEventListener("touchend", stopLeft, {
+  passive: false
+});
+
+leftButton.addEventListener("touchcancel", stopLeft, {
+  passive: false
+});
+
+leftButton.addEventListener("mousedown", startLeft);
+leftButton.addEventListener("mouseup", stopLeft);
+leftButton.addEventListener("mouseleave", stopLeft);
+
+
+// Rechter knop
+rightButton.addEventListener("touchstart", startRight, {
+  passive: false
+});
+
+rightButton.addEventListener("touchend", stopRight, {
+  passive: false
+});
+
+rightButton.addEventListener("touchcancel", stopRight, {
+  passive: false
+});
+
+rightButton.addEventListener("mousedown", startRight);
+rightButton.addEventListener("mouseup", stopRight);
+rightButton.addEventListener("mouseleave", stopRight);
+
+
+// =========================
+// LEVENS
+// =========================
+
+function updateLives() {
+
+  livesElement.textContent =
+    "❤️".repeat(lives) +
+    "🖤".repeat(3 - lives);
+
+}
+
+
+// =========================
+// VIJANDAUTO MAKEN
+// =========================
+
+function spawnEnemy() {
+
+  const lanes = [80, 180, 280];
+
+  const randomLane =
+    lanes[Math.floor(Math.random() * lanes.length)];
+
+  enemies.push({
+
+    x: randomLane,
+    y: -80,
+
+    width: 40,
+    height: 70,
+
+    speed: 4 + Math.random() * 2
+
+  });
+
+}
+
+
+// =========================
+// BOTSING
+// =========================
+
+function collision(a, b) {
+
+  return (
+
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+
+  );
+
+}
+
+
+// =========================
+// AUTO TEKENEN
+// =========================
+
+function drawCar(car, color) {
+
+  // Schaduw
+  ctx.fillStyle = "rgba(0,0,0,0.4)";
+
+  ctx.fillRect(
+    car.x + 4,
+    car.y + 5,
+    car.width,
+    car.height
+  );
+
+
+  // Auto
+  ctx.fillStyle = color;
+
+  ctx.fillRect(
+    car.x,
+    car.y,
+    car.width,
+    car.height
+  );
+
+
+  // Voorruit
+  ctx.fillStyle = "#111";
+
+  ctx.fillRect(
+    car.x + 7,
+    car.y + 10,
+    car.width - 14,
+    20
+  );
+
+
+  // Achterruit
+  ctx.fillRect(
+    car.x + 7,
+    car.y + 40,
+    car.width - 14,
+    15
+  );
+
+
+  // Wielen
+  ctx.fillStyle = "#000";
+
+  ctx.fillRect(
+    car.x - 5,
+    car.y + 10,
+    6,
+    20
+  );
+
+  ctx.fillRect(
+    car.x + car.width - 1,
+    car.y + 10,
+    6,
+    20
+  );
+
+  ctx.fillRect(
+    car.x - 5,
+    car.y + 45,
+    6,
+    20
+  );
+
+  ctx.fillRect(
+    car.x + car.width - 1,
+    car.y + 45,
+    6,
+    20
+  );
+
+}
+
+
+// =========================
+// RACEBAAN
+// =========================
+
+function drawRoad() {
+
+  // Gras
+  ctx.fillStyle = "#198a35";
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  // Weg
+  ctx.fillStyle = "#3d3d3d";
+
+  ctx.fillRect(
+    35,
+    0,
+    330,
+    canvas.height
+  );
+
+
+  // Witte randen
+  ctx.fillStyle = "white";
+
+  ctx.fillRect(
+    35,
+    0,
+    5,
+    canvas.height
+  );
+
+  ctx.fillRect(
+    360,
+    0,
+    5,
+    canvas.height
+  );
+
+
+  // Middenstrepen
+  ctx.fillStyle = "white";
+
+  if (!paused) {
+
+    roadOffset += 7;
+
+  }
+
+  if (roadOffset >= 60) {
+
+    roadOffset = 0;
+
+  }
+
+
+  for (
+    let y = -60 + roadOffset;
+    y < canvas.height;
+    y += 60
+  ) {
+
+    ctx.fillRect(
+      195,
+      y,
+      10,
+      35
+    );
+
+  }
+
+}
+
+
+// =========================
+// GAME UPDATEN
+// =========================
+
+function update() {
+
+  if (gameOver || paused) {
+    return;
+  }
+
+
+  // Links op PC / telefoon
+  if (
+    keys["arrowleft"] ||
+    keys["a"] ||
+    keys["mobileleft"]
+  ) {
+
+    player.x -= player.speed;
+
+  }
+
+
+  // Rechts op PC / telefoon
+  if (
+    keys["arrowright"] ||
+    keys["d"] ||
+    keys["mobileright"]
+  ) {
+
+    player.x += player.speed;
+
+  }
+
+
+  // Auto binnen de weg houden
+  if (player.x < 45) {
+
+    player.x = 45;
+
+  }
+
+  if (player.x > 315) {
+
+    player.x = 315;
+
+  }
+
+
+  // Vijanden spawnen
+  spawnTimer++;
+
+  if (spawnTimer > 60) {
+
+    spawnEnemy();
+
+    spawnTimer = 0;
+
+  }
+
+
+  // Vijanden bewegen
+  for (
+    let i = enemies.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    const enemy = enemies[i];
+
+    enemy.y += enemy.speed;
+
+
+    // Botsing
+    if (collision(player, enemy)) {
+
+      enemies.splice(i, 1);
+
+      lives--;
+
+      updateLives();
+
+
+      // Nog levens over
+      if (lives > 0) {
+
+        player.x = 180;
+
+      }
+
+
+      // Geen levens meer
+      if (lives <= 0) {
+
+        gameOver = true;
+
+        setTimeout(function() {
+
+          alert(
+            "💥 GAME OVER!\n\nScore: " +
+            score
+          );
+
+          location.reload();
+
+        }, 100);
+
+        return;
+
+      }
+
+    }
+
+
+    // Vijand voorbij
+    if (enemy.y > canvas.height) {
+
+      enemies.splice(i, 1);
+
+      score++;
+
+      scoreElement.textContent =
+        "Score: " + score;
+
+    }
+
+  }
+
+}
+
+
+// =========================
+// TEKENEN
+// =========================
+
+function draw() {
+
+  ctx.clearRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  drawRoad();
+
+
+  // Vijanden
+  enemies.forEach(function(enemy) {
+
+    drawCar(
+      enemy,
+      "#e53935"
+    );
+
+  });
+
+
+  // Speler
+  drawCar(
+    player,
+    "#00e676"
+  );
+
+
+  // =========================
+  // PAUZE SCHERM
+  // =========================
+
+  if (paused) {
+
+    ctx.fillStyle =
+      "rgba(0, 0, 0, 0.65)";
+
+    ctx.fillRect(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+
+    ctx.fillStyle = "white";
+
+    ctx.font =
+      "bold 45px Arial";
+
+    ctx.textAlign = "center";
+
+    ctx.fillText(
+      "PAUZE",
+      canvas.width / 2,
+      280
+    );
+
+
+    ctx.font =
+      "20px Arial";
+
+    ctx.fillText(
+      "Druk op ▶️ om verder te gaan",
+      canvas.width / 2,
+      325
+    );
+
+
+    ctx.textAlign = "left";
+
+  }
+
+}
+
+
+// =========================
+// GAME LOOP
+// =========================
+
+function gameLoop() {
+
+  update();
+
+  draw();
+
+  requestAnimationFrame(
+    gameLoop
+  );
+
+}
+
+
+// =========================
+// START
+// =========================
+
+updateLives();
+
+gameLoop();
