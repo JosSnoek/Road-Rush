@@ -1,4 +1,3 @@
-```javascript
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -43,20 +42,6 @@ const player = {
 
 
 // =========================
-// SNELHEID
-// =========================
-
-// Begin langzaam
-let baseEnemySpeed = 2.5;
-
-// Wordt hoger naarmate je score stijgt
-let levelSpeed = 0;
-
-// Elk verloren leven maakt alles sneller
-let lifeSpeed = 0;
-
-
-// =========================
 // VIJANDEN
 // =========================
 
@@ -65,6 +50,13 @@ let enemies = [];
 let spawnTimer = 0;
 
 let roadOffset = 0;
+
+
+// =========================
+// SNELHEID
+// =========================
+
+let enemyBaseSpeed = 2.5;
 
 
 // =========================
@@ -184,21 +176,6 @@ leftButton.addEventListener(
   { passive: false }
 );
 
-leftButton.addEventListener(
-  "mousedown",
-  startLeft
-);
-
-leftButton.addEventListener(
-  "mouseup",
-  stopLeft
-);
-
-leftButton.addEventListener(
-  "mouseleave",
-  stopLeft
-);
-
 
 // Rechter knop
 
@@ -220,6 +197,25 @@ rightButton.addEventListener(
   { passive: false }
 );
 
+
+// PC muis
+
+leftButton.addEventListener(
+  "mousedown",
+  startLeft
+);
+
+leftButton.addEventListener(
+  "mouseup",
+  stopLeft
+);
+
+leftButton.addEventListener(
+  "mouseleave",
+  stopLeft
+);
+
+
 rightButton.addEventListener(
   "mousedown",
   startRight
@@ -237,69 +233,12 @@ rightButton.addEventListener(
 
 
 // =========================
-// LEVENS
-// =========================
-
-function updateLives() {
-
-  if (lives === 3) {
-
-    livesElement.textContent =
-      "❤️ ❤️ ❤️";
-
-  } else if (lives === 2) {
-
-    livesElement.textContent =
-      "❤️ ❤️ 🖤";
-
-  } else if (lives === 1) {
-
-    livesElement.textContent =
-      "❤️ 🖤 🖤";
-
-  } else {
-
-    livesElement.textContent =
-      "🖤 🖤 🖤";
-
-  }
-
-}
-
-
-// =========================
-// LEVEL
-// =========================
-
-function updateLevel() {
-
-  // Iedere 5 punten een level hoger
-
-  level =
-    Math.floor(score / 5) + 1;
-
-  levelElement.textContent =
-    "Level: " + level;
-
-  // Elke level wordt sneller
-
-  levelSpeed =
-    (level - 1) * 0.5;
-
-}
-
-
-// =========================
-// AUTO'S SPAWNEN
+// VIJANDAUTO
 // =========================
 
 function spawnEnemy() {
 
-  const lanes = [
-    80,
-    180,
-    280
-  ];
+  const lanes = [80, 180, 280];
 
   const randomLane =
     lanes[
@@ -308,6 +247,7 @@ function spawnEnemy() {
       )
     ];
 
+
   enemies.push({
 
     x: randomLane,
@@ -315,13 +255,12 @@ function spawnEnemy() {
     y: -80,
 
     width: 40,
+
     height: 70,
 
     speed:
-      baseEnemySpeed +
-      levelSpeed +
-      lifeSpeed +
-      Math.random() * 1.2
+      enemyBaseSpeed +
+      Math.random() * 1.5
 
   });
 
@@ -350,6 +289,65 @@ function collision(a, b) {
 
 
 // =========================
+// HARTJES
+// =========================
+
+function updateLives() {
+
+  if (lives === 3) {
+
+    livesElement.textContent =
+      "❤️ ❤️ ❤️";
+
+  }
+
+  else if (lives === 2) {
+
+    livesElement.textContent =
+      "❤️ ❤️ 🖤";
+
+  }
+
+  else if (lives === 1) {
+
+    livesElement.textContent =
+      "❤️ 🖤 🖤";
+
+  }
+
+  else {
+
+    livesElement.textContent =
+      "🖤 🖤 🖤";
+
+  }
+
+}
+
+
+// =========================
+// LEVEL
+// =========================
+
+function updateLevel() {
+
+  level =
+    Math.floor(score / 10) + 1;
+
+
+  // Elke 10 punten een nieuw level
+
+  enemyBaseSpeed =
+    2.5 + (level - 1) * 0.8;
+
+
+  levelElement.textContent =
+    "Level: " + level;
+
+}
+
+
+// =========================
 // AUTO TEKENEN
 // =========================
 
@@ -363,9 +361,11 @@ function drawCar(car, color) {
   ctx.fillRect(
 
     car.x + 4,
+
     car.y + 5,
 
     car.width,
+
     car.height
 
   );
@@ -378,9 +378,11 @@ function drawCar(car, color) {
   ctx.fillRect(
 
     car.x,
+
     car.y,
 
     car.width,
+
     car.height
 
   );
@@ -393,9 +395,11 @@ function drawCar(car, color) {
   ctx.fillRect(
 
     car.x + 7,
+
     car.y + 10,
 
     car.width - 14,
+
     20
 
   );
@@ -406,9 +410,11 @@ function drawCar(car, color) {
   ctx.fillRect(
 
     car.x + 7,
+
     car.y + 40,
 
     car.width - 14,
+
     15
 
   );
@@ -418,32 +424,56 @@ function drawCar(car, color) {
 
   ctx.fillStyle = "#000";
 
+
   ctx.fillRect(
+
     car.x - 5,
+
     car.y + 10,
+
     6,
+
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x + car.width - 1,
+
     car.y + 10,
+
     6,
+
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x - 5,
+
     car.y + 45,
+
     6,
+
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x + car.width - 1,
+
     car.y + 45,
+
     6,
+
     20
+
   );
 
 }
@@ -460,10 +490,12 @@ function drawRoad() {
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
+
     0,
     0,
     canvas.width,
     canvas.height
+
   );
 
 
@@ -472,10 +504,12 @@ function drawRoad() {
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
+
     35,
     0,
     330,
     canvas.height
+
   );
 
 
@@ -484,17 +518,21 @@ function drawRoad() {
   ctx.fillStyle = "white";
 
   ctx.fillRect(
+
     35,
     0,
     5,
     canvas.height
+
   );
 
   ctx.fillRect(
+
     360,
     0,
     5,
     canvas.height
+
   );
 
 
@@ -506,7 +544,7 @@ function drawRoad() {
   if (!paused) {
 
     roadOffset +=
-      4 + levelSpeed + lifeSpeed;
+      5 + level * 0.7;
 
   }
 
@@ -519,17 +557,74 @@ function drawRoad() {
 
 
   for (
+
     let y = -60 + roadOffset;
+
     y < canvas.height;
+
     y += 60
+
   ) {
 
     ctx.fillRect(
+
       195,
       y,
       10,
       35
+
     );
+
+  }
+
+}
+
+
+// =========================
+// LEVEN VERLIEZEN
+// =========================
+
+function loseLife() {
+
+  lives--;
+
+  updateLives();
+
+
+  // Auto's verwijderen
+
+  enemies = [];
+
+
+  // Speler terugzetten
+
+  player.x = 180;
+
+
+  // Elk verloren leven maakt hem sneller
+
+  enemyBaseSpeed += 1.2;
+
+
+  if (lives <= 0) {
+
+    gameOver = true;
+
+
+    setTimeout(function() {
+
+      alert(
+
+        "💥 GAME OVER!\n\n" +
+
+        "Score: " +
+        score
+
+      );
+
+      location.reload();
+
+    }, 100);
 
   }
 
@@ -549,32 +644,38 @@ function update() {
   }
 
 
-  // =========================
-  // SPELER BEWEGEN
-  // =========================
+  // Links
 
   if (
 
     keys["arrowleft"] ||
+
     keys["a"] ||
+
     keys["mobileleft"]
 
   ) {
 
-    player.x -= player.speed;
+    player.x -=
+      player.speed;
 
   }
 
 
+  // Rechts
+
   if (
 
     keys["arrowright"] ||
+
     keys["d"] ||
+
     keys["mobileright"]
 
   ) {
 
-    player.x += player.speed;
+    player.x +=
+      player.speed;
 
   }
 
@@ -595,23 +696,19 @@ function update() {
   }
 
 
-  // =========================
-  // VIJANDEN SPAWNEN
-  // =========================
+  // Vijanden spawnen
 
   spawnTimer++;
 
 
-  // Langzaam beginnen met spawnen
-
-  const spawnDelay =
+  const spawnSpeed =
     Math.max(
       35,
-      70 - (level - 1) * 4
+      70 - level * 3
     );
 
 
-  if (spawnTimer > spawnDelay) {
+  if (spawnTimer > spawnSpeed) {
 
     spawnEnemy();
 
@@ -620,87 +717,53 @@ function update() {
   }
 
 
-  // =========================
-  // VIJANDEN BEWEGEN
-  // =========================
+  // Vijanden
 
   for (
+
     let i = enemies.length - 1;
+
     i >= 0;
+
     i--
+
   ) {
 
-    const enemy = enemies[i];
+    const enemy =
+      enemies[i];
 
 
-    enemy.y += enemy.speed;
+    enemy.y +=
+      enemy.speed +
+      (level - 1) * 0.25;
 
 
-    // =========================
-    // BOTSING
-    // =========================
+    // Botsing
 
-    if (collision(player, enemy)) {
-
-      // Vijand verwijderen
+    if (
+      collision(
+        player,
+        enemy
+      )
+    ) {
 
       enemies.splice(i, 1);
 
+      loseLife();
 
-      // 1 leven verliezen
-
-      lives--;
-
-
-      // Elk verloren leven maakt
-      // de auto's sneller
-
-      lifeSpeed += 1.5;
-
-
-      updateLives();
-
-
-      // Auto van speler terugzetten
-
-      player.x = 180;
-
-
-      // Als alle levens op zijn
-
-      if (lives <= 0) {
-
-        gameOver = true;
-
-        setTimeout(function() {
-
-          alert(
-
-            "💥 GAME OVER!\n\n" +
-            "Score: " + score +
-            "\nLevel: " + level
-
-          );
-
-          location.reload();
-
-        }, 100);
-
-      }
-
-      continue;
+      return;
 
     }
 
 
-    // =========================
-    // AUTO VOORBIJ
-    // =========================
+    // Vijand voorbij
 
-    if (enemy.y > canvas.height) {
+    if (
+      enemy.y >
+      canvas.height
+    ) {
 
       enemies.splice(i, 1);
-
 
       score++;
 
@@ -739,14 +802,16 @@ function draw() {
 
   // Vijanden
 
-  enemies.forEach(function(enemy) {
+  enemies.forEach(
+    function(enemy) {
 
-    drawCar(
-      enemy,
-      "#e53935"
-    );
+      drawCar(
+        enemy,
+        "#e53935"
+      );
 
-  });
+    }
+  );
 
 
   // Speler
@@ -757,14 +822,13 @@ function draw() {
   );
 
 
-  // =========================
-  // PAUZE SCHERM
-  // =========================
+  // Pauze
 
   if (paused) {
 
     ctx.fillStyle =
       "rgba(0,0,0,0.65)";
+
 
     ctx.fillRect(
 
@@ -776,18 +840,26 @@ function draw() {
     );
 
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle =
+      "white";
+
 
     ctx.font =
       "bold 45px Arial";
 
-    ctx.textAlign = "center";
+
+    ctx.textAlign =
+      "center";
 
 
     ctx.fillText(
+
       "PAUZE",
+
       canvas.width / 2,
+
       280
+
     );
 
 
@@ -800,87 +872,16 @@ function draw() {
       "Druk op ▶️ om verder te gaan",
 
       canvas.width / 2,
+
       325
 
     );
 
 
-    ctx.textAlign = "left";
+    ctx.textAlign =
+      "left";
 
   }
-
-}
-
-
-// =========================
-// GAME OVER SCHERM
-// =========================
-
-function drawGameOver() {
-
-  if (!gameOver) {
-    return;
-  }
-
-
-  ctx.fillStyle =
-    "rgba(0,0,0,0.7)";
-
-
-  ctx.fillRect(
-
-    0,
-    0,
-    canvas.width,
-    canvas.height
-
-  );
-
-
-  ctx.fillStyle = "white";
-
-  ctx.textAlign = "center";
-
-
-  ctx.font =
-    "bold 42px Arial";
-
-
-  ctx.fillText(
-
-    "GAME OVER",
-
-    canvas.width / 2,
-    270
-
-  );
-
-
-  ctx.font =
-    "22px Arial";
-
-
-  ctx.fillText(
-
-    "Score: " + score,
-
-    canvas.width / 2,
-    315
-
-  );
-
-
-  ctx.fillText(
-
-    "Level: " + level,
-
-    canvas.width / 2,
-    350
-
-  );
-
-
-  ctx.textAlign = "left";
 
 }
 
@@ -894,8 +895,6 @@ function gameLoop() {
   update();
 
   draw();
-
-  drawGameOver();
 
   requestAnimationFrame(
     gameLoop
@@ -913,4 +912,3 @@ updateLives();
 updateLevel();
 
 gameLoop();
-```
