@@ -8,32 +8,59 @@ const pauseButton = document.getElementById("pauseButton");
 const leftButton = document.getElementById("leftButton");
 const rightButton = document.getElementById("rightButton");
 
+
+// =========================
+// GAME STATUS
+// =========================
+
 let score = 0;
 let lives = 3;
+
 let gameOver = false;
 let paused = false;
 
+let invincible = false;
+
 const keys = {};
 
+
+// =========================
+// SPELER
+// =========================
+
 const player = {
+
   x: 180,
   y: 500,
+
   width: 40,
   height: 70,
+
   speed: 6
+
 };
 
+
+// =========================
+// VIJANDEN
+// =========================
+
 let enemies = [];
+
 let spawnTimer = 0;
+
 let roadOffset = 0;
 
 
 // =========================
-// LEVENS
+// HARTJES
 // =========================
 
 function updateLives() {
-  livesElement.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
+
+  livesElement.textContent =
+    "❤️".repeat(lives);
+
 }
 
 
@@ -46,11 +73,15 @@ document.addEventListener("keydown", function(e) {
   keys[e.key.toLowerCase()] = true;
 
   if (e.code === "Space") {
+
     e.preventDefault();
+
     togglePause();
+
   }
 
 });
+
 
 document.addEventListener("keyup", function(e) {
 
@@ -63,7 +94,11 @@ document.addEventListener("keyup", function(e) {
 // PAUZE
 // =========================
 
-pauseButton.addEventListener("click", togglePause);
+pauseButton.addEventListener(
+  "click",
+  togglePause
+);
+
 
 function togglePause() {
 
@@ -74,9 +109,13 @@ function togglePause() {
   paused = !paused;
 
   if (paused) {
+
     pauseButton.textContent = "▶️";
+
   } else {
+
     pauseButton.textContent = "⏸️";
+
   }
 
 }
@@ -87,60 +126,140 @@ function togglePause() {
 // =========================
 
 function startLeft(e) {
+
   e.preventDefault();
+
   keys["mobileleft"] = true;
+
 }
+
 
 function stopLeft(e) {
+
   e.preventDefault();
+
   keys["mobileleft"] = false;
+
 }
+
 
 function startRight(e) {
+
   e.preventDefault();
+
   keys["mobileright"] = true;
+
 }
+
 
 function stopRight(e) {
+
   e.preventDefault();
+
   keys["mobileright"] = false;
+
 }
 
 
-leftButton.addEventListener("touchstart", startLeft, { passive: false });
-leftButton.addEventListener("touchend", stopLeft, { passive: false });
-leftButton.addEventListener("touchcancel", stopLeft, { passive: false });
+// Linker knop
 
-rightButton.addEventListener("touchstart", startRight, { passive: false });
-rightButton.addEventListener("touchend", stopRight, { passive: false });
-rightButton.addEventListener("touchcancel", stopRight, { passive: false });
+leftButton.addEventListener(
+  "touchstart",
+  startLeft,
+  { passive: false }
+);
 
-leftButton.addEventListener("mousedown", startLeft);
-leftButton.addEventListener("mouseup", stopLeft);
-leftButton.addEventListener("mouseleave", stopLeft);
+leftButton.addEventListener(
+  "touchend",
+  stopLeft,
+  { passive: false }
+);
 
-rightButton.addEventListener("mousedown", startRight);
-rightButton.addEventListener("mouseup", stopRight);
-rightButton.addEventListener("mouseleave", stopRight);
+leftButton.addEventListener(
+  "touchcancel",
+  stopLeft,
+  { passive: false }
+);
+
+leftButton.addEventListener(
+  "mousedown",
+  startLeft
+);
+
+leftButton.addEventListener(
+  "mouseup",
+  stopLeft
+);
+
+leftButton.addEventListener(
+  "mouseleave",
+  stopLeft
+);
+
+
+// Rechter knop
+
+rightButton.addEventListener(
+  "touchstart",
+  startRight,
+  { passive: false }
+);
+
+rightButton.addEventListener(
+  "touchend",
+  stopRight,
+  { passive: false }
+);
+
+rightButton.addEventListener(
+  "touchcancel",
+  stopRight,
+  { passive: false }
+);
+
+rightButton.addEventListener(
+  "mousedown",
+  startRight
+);
+
+rightButton.addEventListener(
+  "mouseup",
+  stopRight
+);
+
+rightButton.addEventListener(
+  "mouseleave",
+  stopRight
+);
 
 
 // =========================
-// VIJANDAUTO
+// VIJAND MAKEN
 // =========================
 
 function spawnEnemy() {
 
-  const lanes = [80, 180, 280];
+  const lanes = [
+    80,
+    180,
+    280
+  ];
 
   const randomLane =
-    lanes[Math.floor(Math.random() * lanes.length)];
+    lanes[
+      Math.floor(
+        Math.random() * lanes.length
+      )
+    ];
 
   enemies.push({
 
     x: randomLane,
+
     y: -80,
 
     width: 40,
+
     height: 70,
 
     speed: 4 + Math.random() * 2
@@ -157,52 +276,87 @@ function spawnEnemy() {
 function collision(a, b) {
 
   return (
+
     a.x < b.x + b.width &&
+
     a.x + a.width > b.x &&
+
     a.y < b.y + b.height &&
+
     a.y + a.height > b.y
+
   );
 
 }
 
 
 // =========================
-// BOTSING VERWERKEN
+// BOTSING AFHANDELEN
 // =========================
 
-function hitPlayer(enemy, index) {
+function hitPlayer(enemyIndex) {
+
+  // Geen dubbele botsing
+  if (invincible || gameOver) {
+    return;
+  }
+
 
   // Vijand verwijderen
-  enemies.splice(index, 1);
+  enemies.splice(
+    enemyIndex,
+    1
+  );
 
-  // 1 leven eraf
+
+  // Eén leven kwijt
   lives--;
 
   updateLives();
 
-  // Auto terug naar het midden
+
+  // Speler terug naar veilige positie
   player.x = 180;
 
-  // Als alle levens op zijn
-  if (lives <= 0) {
 
-    lives = 0;
-    updateLives();
+  // Onkwetsbaar maken
+  invincible = true;
 
-    gameOver = true;
 
-    setTimeout(function() {
+  // Na 1 seconde weer kwetsbaar
+  setTimeout(function() {
 
-      alert(
-        "💥 GAME OVER!\n\nScore: " +
-        score
-      );
+    invincible = false;
 
-      location.reload();
+  }, 1000);
 
-    }, 100);
+
+  // Nog levens over
+  if (lives > 0) {
+
+    return;
 
   }
+
+
+  // Geen levens meer
+  lives = 0;
+
+  updateLives();
+
+  gameOver = true;
+
+
+  setTimeout(function() {
+
+    alert(
+      "💥 GAME OVER!\n\nScore: " +
+      score
+    );
+
+    location.reload();
+
+  }, 100);
 
 }
 
@@ -214,76 +368,110 @@ function hitPlayer(enemy, index) {
 function drawCar(car, color) {
 
   // Schaduw
-  ctx.fillStyle = "rgba(0,0,0,0.4)";
+
+  ctx.fillStyle =
+    "rgba(0,0,0,0.4)";
 
   ctx.fillRect(
+
     car.x + 4,
     car.y + 5,
+
     car.width,
     car.height
+
   );
 
 
   // Auto
+
   ctx.fillStyle = color;
 
   ctx.fillRect(
+
     car.x,
     car.y,
+
     car.width,
     car.height
+
   );
 
 
   // Voorruit
+
   ctx.fillStyle = "#111";
 
   ctx.fillRect(
+
     car.x + 7,
     car.y + 10,
+
     car.width - 14,
     20
+
   );
 
 
   // Achterruit
+
   ctx.fillRect(
+
     car.x + 7,
     car.y + 40,
+
     car.width - 14,
     15
+
   );
 
 
   // Wielen
+
   ctx.fillStyle = "#000";
 
+
   ctx.fillRect(
+
     car.x - 5,
     car.y + 10,
+
     6,
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x + car.width - 1,
     car.y + 10,
+
     6,
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x - 5,
     car.y + 45,
+
     6,
     20
+
   );
 
+
   ctx.fillRect(
+
     car.x + car.width - 1,
     car.y + 45,
+
     6,
     20
+
   );
 
 }
@@ -296,68 +484,96 @@ function drawCar(car, color) {
 function drawRoad() {
 
   // Gras
+
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
+
     0,
     0,
+
     canvas.width,
     canvas.height
+
   );
 
 
   // Weg
+
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
+
     35,
     0,
+
     330,
     canvas.height
+
   );
 
 
   // Witte randen
+
   ctx.fillStyle = "white";
 
-  ctx.fillRect(
-    35,
-    0,
-    5,
-    canvas.height
-  );
 
   ctx.fillRect(
-    360,
+
+    35,
     0,
+
     5,
     canvas.height
+
+  );
+
+
+  ctx.fillRect(
+
+    360,
+    0,
+
+    5,
+    canvas.height
+
   );
 
 
   // Middenstrepen
-  ctx.fillStyle = "white";
 
   if (!paused) {
+
     roadOffset += 7;
+
   }
 
+
   if (roadOffset >= 60) {
+
     roadOffset = 0;
+
   }
 
 
   for (
+
     let y = -60 + roadOffset;
+
     y < canvas.height;
+
     y += 60
+
   ) {
 
     ctx.fillRect(
+
       195,
       y,
+
       10,
       35
+
     );
 
   }
@@ -372,15 +588,20 @@ function drawRoad() {
 function update() {
 
   if (gameOver || paused) {
+
     return;
+
   }
 
 
   // Links
+
   if (
+
     keys["arrowleft"] ||
     keys["a"] ||
     keys["mobileleft"]
+
   ) {
 
     player.x -= player.speed;
@@ -389,10 +610,13 @@ function update() {
 
 
   // Rechts
+
   if (
+
     keys["arrowright"] ||
     keys["d"] ||
     keys["mobileright"]
+
   ) {
 
     player.x += player.speed;
@@ -401,17 +625,25 @@ function update() {
 
 
   // Binnen de weg
+
   if (player.x < 45) {
+
     player.x = 45;
+
   }
 
+
   if (player.x > 315) {
+
     player.x = 315;
+
   }
 
 
   // Vijanden spawnen
+
   spawnTimer++;
+
 
   if (spawnTimer > 60) {
 
@@ -423,26 +655,28 @@ function update() {
 
 
   // Vijanden bewegen
+
   for (
+
     let i = enemies.length - 1;
+
     i >= 0;
+
     i--
+
   ) {
 
     const enemy = enemies[i];
+
 
     enemy.y += enemy.speed;
 
 
     // Botsing
+
     if (collision(player, enemy)) {
 
-      hitPlayer(enemy, i);
-
-      // Alleen stoppen als game over is
-      if (gameOver) {
-        return;
-      }
+      hitPlayer(i);
 
       continue;
 
@@ -450,11 +684,13 @@ function update() {
 
 
     // Vijand voorbij
+
     if (enemy.y > canvas.height) {
 
       enemies.splice(i, 1);
 
       score++;
+
 
       scoreElement.textContent =
         "Score: " + score;
@@ -473,10 +709,13 @@ function update() {
 function draw() {
 
   ctx.clearRect(
+
     0,
     0,
+
     canvas.width,
     canvas.height
+
   );
 
 
@@ -484,6 +723,7 @@ function draw() {
 
 
   // Vijanden
+
   enemies.forEach(function(enemy) {
 
     drawCar(
@@ -494,24 +734,39 @@ function draw() {
   });
 
 
-  // Speler
-  drawCar(
-    player,
-    "#00e676"
-  );
+  // Speler laten knipperen
+  // wanneer hij onkwetsbaar is
+
+  if (
+
+    !invincible ||
+    Math.floor(Date.now() / 100) % 2 === 0
+
+  ) {
+
+    drawCar(
+      player,
+      "#00e676"
+    );
+
+  }
 
 
-  // Pauze
+  // Pauze scherm
+
   if (paused) {
 
     ctx.fillStyle =
-      "rgba(0, 0, 0, 0.65)";
+      "rgba(0,0,0,0.65)";
 
     ctx.fillRect(
+
       0,
       0,
+
       canvas.width,
       canvas.height
+
     );
 
 
@@ -522,20 +777,28 @@ function draw() {
 
     ctx.textAlign = "center";
 
+
     ctx.fillText(
+
       "PAUZE",
+
       canvas.width / 2,
       280
+
     );
 
 
     ctx.font =
       "20px Arial";
 
+
     ctx.fillText(
+
       "Druk op ▶️ om verder te gaan",
+
       canvas.width / 2,
       325
+
     );
 
 
@@ -556,7 +819,9 @@ function gameLoop() {
 
   draw();
 
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(
+    gameLoop
+  );
 
 }
 
