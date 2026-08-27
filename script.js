@@ -1,3 +1,4 @@
+```javascript
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -11,32 +12,15 @@ const rightButton = document.getElementById("rightButton");
 
 
 // =========================
-// GAME STATUS
+// GAME
 // =========================
 
 let score = 0;
-let lives = 3;
 let level = 1;
+let lives = 3;
 
 let gameOver = false;
 let paused = false;
-
-let invincibleUntil = 0;
-
-
-// =========================
-// SNELHEID
-// =========================
-
-// Dit is de startsnelheid.
-// Level 1 is lekker langzaam.
-let enemyBaseSpeed = 2.5;
-
-// Hoeveel sneller ieder level wordt
-const speedPerLevel = 0.7;
-
-// Snelheid van de wegstrepen
-let roadSpeed = 4;
 
 const keys = {};
 
@@ -47,15 +31,29 @@ const keys = {};
 
 const player = {
 
-    x: 180,
-    y: 500,
+  x: 180,
+  y: 500,
 
-    width: 40,
-    height: 70,
+  width: 40,
+  height: 70,
 
-    speed: 6
+  speed: 6
 
 };
+
+
+// =========================
+// SNELHEID
+// =========================
+
+// Begin langzaam
+let baseEnemySpeed = 2.5;
+
+// Wordt hoger naarmate je score stijgt
+let levelSpeed = 0;
+
+// Elk verloren leven maakt alles sneller
+let lifeSpeed = 0;
 
 
 // =========================
@@ -65,86 +63,34 @@ const player = {
 let enemies = [];
 
 let spawnTimer = 0;
+
 let roadOffset = 0;
-
-
-// =========================
-// LEVENS
-// =========================
-
-function updateLives() {
-
-    livesElement.textContent =
-        "❤️".repeat(Math.max(0, lives));
-
-}
-
-
-// =========================
-// LEVEL
-// =========================
-
-function updateLevel() {
-
-    // Iedere 10 punten een nieuw level
-    level =
-        Math.floor(score / 10) + 1;
-
-
-    levelElement.textContent =
-        "Level: " + level;
-
-
-    // Vijanden worden per level sneller
-    enemyBaseSpeed =
-        2.5 + (level - 1) * speedPerLevel;
-
-
-    // Weg wordt ook sneller
-    roadSpeed =
-        4 + (level - 1) * 0.6;
-
-}
-
-
-// =========================
-// START
-// =========================
-
-updateLives();
-updateLevel();
 
 
 // =========================
 // PC BESTURING
 // =========================
 
-document.addEventListener(
-    "keydown",
-    function(e) {
+document.addEventListener("keydown", function(e) {
 
-        keys[e.key.toLowerCase()] = true;
+  keys[e.key.toLowerCase()] = true;
 
-        if (e.code === "Space") {
+  if (e.code === "Space") {
 
-            e.preventDefault();
+    e.preventDefault();
 
-            togglePause();
+    togglePause();
 
-        }
+  }
 
-    }
-);
+});
 
 
-document.addEventListener(
-    "keyup",
-    function(e) {
+document.addEventListener("keyup", function(e) {
 
-        keys[e.key.toLowerCase()] = false;
+  keys[e.key.toLowerCase()] = false;
 
-    }
-);
+});
 
 
 // =========================
@@ -152,21 +98,28 @@ document.addEventListener(
 // =========================
 
 pauseButton.addEventListener(
-    "click",
-    togglePause
+  "click",
+  togglePause
 );
 
 
 function togglePause() {
 
-    if (gameOver) {
-        return;
-    }
+  if (gameOver) {
+    return;
+  }
 
-    paused = !paused;
+  paused = !paused;
 
-    pauseButton.textContent =
-        paused ? "▶️" : "⏸️";
+  if (paused) {
+
+    pauseButton.textContent = "▶️";
+
+  } else {
+
+    pauseButton.textContent = "⏸️";
+
+  }
 
 }
 
@@ -177,36 +130,36 @@ function togglePause() {
 
 function startLeft(e) {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    keys.mobileleft = true;
+  keys["mobileleft"] = true;
 
 }
 
 
 function stopLeft(e) {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    keys.mobileleft = false;
+  keys["mobileleft"] = false;
 
 }
 
 
 function startRight(e) {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    keys.mobileright = true;
+  keys["mobileright"] = true;
 
 }
 
 
 function stopRight(e) {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    keys.mobileright = false;
+  keys["mobileright"] = false;
 
 }
 
@@ -214,115 +167,163 @@ function stopRight(e) {
 // Linker knop
 
 leftButton.addEventListener(
-    "touchstart",
-    startLeft,
-    { passive: false }
+  "touchstart",
+  startLeft,
+  { passive: false }
 );
 
 leftButton.addEventListener(
-    "touchend",
-    stopLeft,
-    { passive: false }
+  "touchend",
+  stopLeft,
+  { passive: false }
 );
 
 leftButton.addEventListener(
-    "touchcancel",
-    stopLeft,
-    { passive: false }
+  "touchcancel",
+  stopLeft,
+  { passive: false }
+);
+
+leftButton.addEventListener(
+  "mousedown",
+  startLeft
+);
+
+leftButton.addEventListener(
+  "mouseup",
+  stopLeft
+);
+
+leftButton.addEventListener(
+  "mouseleave",
+  stopLeft
 );
 
 
 // Rechter knop
 
 rightButton.addEventListener(
-    "touchstart",
-    startRight,
-    { passive: false }
+  "touchstart",
+  startRight,
+  { passive: false }
 );
 
 rightButton.addEventListener(
-    "touchend",
-    stopRight,
-    { passive: false }
+  "touchend",
+  stopRight,
+  { passive: false }
 );
 
 rightButton.addEventListener(
-    "touchcancel",
-    stopRight,
-    { passive: false }
-);
-
-
-// Muis / PC
-
-leftButton.addEventListener(
-    "mousedown",
-    startLeft
-);
-
-leftButton.addEventListener(
-    "mouseup",
-    stopLeft
-);
-
-leftButton.addEventListener(
-    "mouseleave",
-    stopLeft
-);
-
-
-rightButton.addEventListener(
-    "mousedown",
-    startRight
+  "touchcancel",
+  stopRight,
+  { passive: false }
 );
 
 rightButton.addEventListener(
-    "mouseup",
-    stopRight
+  "mousedown",
+  startRight
 );
 
 rightButton.addEventListener(
-    "mouseleave",
-    stopRight
+  "mouseup",
+  stopRight
+);
+
+rightButton.addEventListener(
+  "mouseleave",
+  stopRight
 );
 
 
 // =========================
-// VIJAND MAKEN
+// LEVENS
+// =========================
+
+function updateLives() {
+
+  if (lives === 3) {
+
+    livesElement.textContent =
+      "❤️ ❤️ ❤️";
+
+  } else if (lives === 2) {
+
+    livesElement.textContent =
+      "❤️ ❤️ 🖤";
+
+  } else if (lives === 1) {
+
+    livesElement.textContent =
+      "❤️ 🖤 🖤";
+
+  } else {
+
+    livesElement.textContent =
+      "🖤 🖤 🖤";
+
+  }
+
+}
+
+
+// =========================
+// LEVEL
+// =========================
+
+function updateLevel() {
+
+  // Iedere 5 punten een level hoger
+
+  level =
+    Math.floor(score / 5) + 1;
+
+  levelElement.textContent =
+    "Level: " + level;
+
+  // Elke level wordt sneller
+
+  levelSpeed =
+    (level - 1) * 0.5;
+
+}
+
+
+// =========================
+// AUTO'S SPAWNEN
 // =========================
 
 function spawnEnemy() {
 
-    const lanes = [
-        80,
-        180,
-        280
+  const lanes = [
+    80,
+    180,
+    280
+  ];
+
+  const randomLane =
+    lanes[
+      Math.floor(
+        Math.random() * lanes.length
+      )
     ];
 
-    const lane =
-        lanes[
-            Math.floor(
-                Math.random() * lanes.length
-            )
-        ];
+  enemies.push({
 
-    enemies.push({
+    x: randomLane,
 
-        x: lane,
+    y: -80,
 
-        y: -80,
+    width: 40,
+    height: 70,
 
-        width: 40,
+    speed:
+      baseEnemySpeed +
+      levelSpeed +
+      lifeSpeed +
+      Math.random() * 1.2
 
-        height: 70,
-
-        // Iedere vijand krijgt de
-        // snelheid van het huidige level
-        speed:
-            enemyBaseSpeed +
-            Math.random() * 1.2
-
-    });
+  });
 
 }
 
@@ -333,93 +334,17 @@ function spawnEnemy() {
 
 function collision(a, b) {
 
-    return (
+  return (
 
-        a.x < b.x + b.width &&
+    a.x < b.x + b.width &&
 
-        a.x + a.width > b.x &&
+    a.x + a.width > b.x &&
 
-        a.y < b.y + b.height &&
+    a.y < b.y + b.height &&
 
-        a.y + a.height > b.y
+    a.y + a.height > b.y
 
-    );
-
-}
-
-
-// =========================
-// BOTSING AFHANDELEN
-// =========================
-
-function handleCollision(index) {
-
-    // Nog onkwetsbaar?
-    if (
-        Date.now() < invincibleUntil
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        index < 0 ||
-        index >= enemies.length
-    ) {
-
-        return;
-
-    }
-
-
-    // Auto verwijderen
-    enemies.splice(index, 1);
-
-
-    // 1 leven kwijt
-    lives--;
-
-    updateLives();
-
-
-    // 1 seconde onkwetsbaar
-    invincibleUntil =
-        Date.now() + 1000;
-
-
-    // Terug naar midden
-    player.x = 180;
-
-
-    // Nog levens?
-    if (lives > 0) {
-
-        return;
-
-    }
-
-
-    // Game over
-    lives = 0;
-
-    updateLives();
-
-    gameOver = true;
-
-
-    setTimeout(function() {
-
-        alert(
-            "💥 GAME OVER!\n\n" +
-            "Score: " + score +
-            "\nLevel: " + level
-        );
-
-        window.location.reload();
-
-    }, 100);
+  );
 
 }
 
@@ -430,112 +355,96 @@ function handleCollision(index) {
 
 function drawCar(car, color) {
 
-    // Schaduw
+  // Schaduw
 
-    ctx.fillStyle =
-        "rgba(0,0,0,0.4)";
+  ctx.fillStyle =
+    "rgba(0,0,0,0.4)";
 
-    ctx.fillRect(
+  ctx.fillRect(
 
-        car.x + 4,
-        car.y + 5,
+    car.x + 4,
+    car.y + 5,
 
-        car.width,
-        car.height
+    car.width,
+    car.height
 
-    );
-
-
-    // Auto
-
-    ctx.fillStyle = color;
-
-    ctx.fillRect(
-
-        car.x,
-        car.y,
-
-        car.width,
-        car.height
-
-    );
+  );
 
 
-    // Voorruit
+  // Auto
 
-    ctx.fillStyle = "#111";
+  ctx.fillStyle = color;
 
-    ctx.fillRect(
+  ctx.fillRect(
 
-        car.x + 7,
-        car.y + 10,
+    car.x,
+    car.y,
 
-        car.width - 14,
-        20
+    car.width,
+    car.height
 
-    );
-
-
-    // Achterruit
-
-    ctx.fillRect(
-
-        car.x + 7,
-        car.y + 40,
-
-        car.width - 14,
-        15
-
-    );
+  );
 
 
-    // Wielen
+  // Voorruit
 
-    ctx.fillStyle = "#000";
+  ctx.fillStyle = "#111";
 
+  ctx.fillRect(
 
-    ctx.fillRect(
+    car.x + 7,
+    car.y + 10,
 
-        car.x - 5,
-        car.y + 10,
+    car.width - 14,
+    20
 
-        6,
-        20
-
-    );
-
-
-    ctx.fillRect(
-
-        car.x + car.width - 1,
-        car.y + 10,
-
-        6,
-        20
-
-    );
+  );
 
 
-    ctx.fillRect(
+  // Achterruit
 
-        car.x - 5,
-        car.y + 45,
+  ctx.fillRect(
 
-        6,
-        20
+    car.x + 7,
+    car.y + 40,
 
-    );
+    car.width - 14,
+    15
+
+  );
 
 
-    ctx.fillRect(
+  // Wielen
 
-        car.x + car.width - 1,
-        car.y + 45,
+  ctx.fillStyle = "#000";
 
-        6,
-        20
+  ctx.fillRect(
+    car.x - 5,
+    car.y + 10,
+    6,
+    20
+  );
 
-    );
+  ctx.fillRect(
+    car.x + car.width - 1,
+    car.y + 10,
+    6,
+    20
+  );
+
+  ctx.fillRect(
+    car.x - 5,
+    car.y + 45,
+    6,
+    20
+  );
+
+  ctx.fillRect(
+    car.x + car.width - 1,
+    car.y + 45,
+    6,
+    20
+  );
 
 }
 
@@ -546,102 +455,83 @@ function drawCar(car, color) {
 
 function drawRoad() {
 
-    // Gras
+  // Gras
 
-    ctx.fillStyle =
-        "#198a35";
+  ctx.fillStyle = "#198a35";
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  // Weg
+
+  ctx.fillStyle = "#3d3d3d";
+
+  ctx.fillRect(
+    35,
+    0,
+    330,
+    canvas.height
+  );
+
+
+  // Witte randen
+
+  ctx.fillStyle = "white";
+
+  ctx.fillRect(
+    35,
+    0,
+    5,
+    canvas.height
+  );
+
+  ctx.fillRect(
+    360,
+    0,
+    5,
+    canvas.height
+  );
+
+
+  // Middenstrepen
+
+  ctx.fillStyle = "white";
+
+
+  if (!paused) {
+
+    roadOffset +=
+      4 + levelSpeed + lifeSpeed;
+
+  }
+
+
+  if (roadOffset >= 60) {
+
+    roadOffset = 0;
+
+  }
+
+
+  for (
+    let y = -60 + roadOffset;
+    y < canvas.height;
+    y += 60
+  ) {
 
     ctx.fillRect(
-
-        0,
-        0,
-
-        canvas.width,
-        canvas.height
-
+      195,
+      y,
+      10,
+      35
     );
 
-
-    // Weg
-
-    ctx.fillStyle =
-        "#3d3d3d";
-
-    ctx.fillRect(
-
-        35,
-        0,
-
-        330,
-        canvas.height
-
-    );
-
-
-    // Witte randen
-
-    ctx.fillStyle = "white";
-
-
-    ctx.fillRect(
-
-        35,
-        0,
-
-        5,
-        canvas.height
-
-    );
-
-
-    ctx.fillRect(
-
-        360,
-        0,
-
-        5,
-        canvas.height
-
-    );
-
-
-    // Middenstrepen
-
-    if (!paused) {
-
-        roadOffset += roadSpeed;
-
-    }
-
-
-    if (roadOffset >= 60) {
-
-        roadOffset = 0;
-
-    }
-
-
-    for (
-
-        let y = -60 + roadOffset;
-
-        y < canvas.height;
-
-        y += 60
-
-    ) {
-
-        ctx.fillRect(
-
-            195,
-            y,
-
-            10,
-            35
-
-        );
-
-    }
+  }
 
 }
 
@@ -652,140 +542,178 @@ function drawRoad() {
 
 function update() {
 
-    if (
-        gameOver ||
-        paused
-    ) {
+  if (gameOver || paused) {
 
-        return;
+    return;
+
+  }
+
+
+  // =========================
+  // SPELER BEWEGEN
+  // =========================
+
+  if (
+
+    keys["arrowleft"] ||
+    keys["a"] ||
+    keys["mobileleft"]
+
+  ) {
+
+    player.x -= player.speed;
+
+  }
+
+
+  if (
+
+    keys["arrowright"] ||
+    keys["d"] ||
+    keys["mobileright"]
+
+  ) {
+
+    player.x += player.speed;
+
+  }
+
+
+  // Binnen de weg
+
+  if (player.x < 45) {
+
+    player.x = 45;
+
+  }
+
+
+  if (player.x > 315) {
+
+    player.x = 315;
+
+  }
+
+
+  // =========================
+  // VIJANDEN SPAWNEN
+  // =========================
+
+  spawnTimer++;
+
+
+  // Langzaam beginnen met spawnen
+
+  const spawnDelay =
+    Math.max(
+      35,
+      70 - (level - 1) * 4
+    );
+
+
+  if (spawnTimer > spawnDelay) {
+
+    spawnEnemy();
+
+    spawnTimer = 0;
+
+  }
+
+
+  // =========================
+  // VIJANDEN BEWEGEN
+  // =========================
+
+  for (
+    let i = enemies.length - 1;
+    i >= 0;
+    i--
+  ) {
+
+    const enemy = enemies[i];
+
+
+    enemy.y += enemy.speed;
+
+
+    // =========================
+    // BOTSING
+    // =========================
+
+    if (collision(player, enemy)) {
+
+      // Vijand verwijderen
+
+      enemies.splice(i, 1);
+
+
+      // 1 leven verliezen
+
+      lives--;
+
+
+      // Elk verloren leven maakt
+      // de auto's sneller
+
+      lifeSpeed += 1.5;
+
+
+      updateLives();
+
+
+      // Auto van speler terugzetten
+
+      player.x = 180;
+
+
+      // Als alle levens op zijn
+
+      if (lives <= 0) {
+
+        gameOver = true;
+
+        setTimeout(function() {
+
+          alert(
+
+            "💥 GAME OVER!\n\n" +
+            "Score: " + score +
+            "\nLevel: " + level
+
+          );
+
+          location.reload();
+
+        }, 100);
+
+      }
+
+      continue;
 
     }
 
 
-    // Links
+    // =========================
+    // AUTO VOORBIJ
+    // =========================
 
-    if (
+    if (enemy.y > canvas.height) {
 
-        keys.arrowleft ||
-        keys.a ||
-        keys.mobileleft
-
-    ) {
-
-        player.x -= player.speed;
-
-    }
+      enemies.splice(i, 1);
 
 
-    // Rechts
+      score++;
 
-    if (
 
-        keys.arrowright ||
-        keys.d ||
-        keys.mobileright
+      scoreElement.textContent =
+        "Score: " + score;
 
-    ) {
 
-        player.x += player.speed;
+      updateLevel();
 
     }
 
-
-    // Binnen de weg
-
-    if (player.x < 45) {
-
-        player.x = 45;
-
-    }
-
-
-    if (player.x > 315) {
-
-        player.x = 315;
-
-    }
-
-
-    // Vijanden spawnen
-
-    spawnTimer++;
-
-
-    if (spawnTimer >= 65) {
-
-        spawnEnemy();
-
-        spawnTimer = 0;
-
-    }
-
-
-    // Vijanden
-
-    for (
-
-        let i = enemies.length - 1;
-
-        i >= 0;
-
-        i--
-
-    ) {
-
-        const enemy =
-            enemies[i];
-
-
-        enemy.y +=
-            enemy.speed;
-
-
-        // Botsing
-
-        if (
-            collision(
-                player,
-                enemy
-            )
-        ) {
-
-            handleCollision(i);
-
-            continue;
-
-        }
-
-
-        // Auto voorbij
-
-        if (
-            enemy.y >
-            canvas.height
-        ) {
-
-            enemies.splice(
-                i,
-                1
-            );
-
-
-            score++;
-
-
-            scoreElement.textContent =
-                "Score: " + score;
-
-
-            // Controleren of level
-            // omhoog moet
-
-            updateLevel();
-
-        }
-
-    }
+  }
 
 }
 
@@ -796,118 +724,163 @@ function update() {
 
 function draw() {
 
-    ctx.clearRect(
+  ctx.clearRect(
 
-        0,
-        0,
+    0,
+    0,
+    canvas.width,
+    canvas.height
 
-        canvas.width,
-        canvas.height
+  );
+
+
+  drawRoad();
+
+
+  // Vijanden
+
+  enemies.forEach(function(enemy) {
+
+    drawCar(
+      enemy,
+      "#e53935"
+    );
+
+  });
+
+
+  // Speler
+
+  drawCar(
+    player,
+    "#00e676"
+  );
+
+
+  // =========================
+  // PAUZE SCHERM
+  // =========================
+
+  if (paused) {
+
+    ctx.fillStyle =
+      "rgba(0,0,0,0.65)";
+
+    ctx.fillRect(
+
+      0,
+      0,
+      canvas.width,
+      canvas.height
 
     );
 
 
-    drawRoad();
+    ctx.fillStyle = "white";
+
+    ctx.font =
+      "bold 45px Arial";
+
+    ctx.textAlign = "center";
 
 
-    // Vijanden
-
-    enemies.forEach(
-        function(enemy) {
-
-            drawCar(
-                enemy,
-                "#e53935"
-            );
-
-        }
+    ctx.fillText(
+      "PAUZE",
+      canvas.width / 2,
+      280
     );
 
 
-    // Speler
-
-    const invincible =
-        Date.now() <
-        invincibleUntil;
+    ctx.font =
+      "20px Arial";
 
 
-    // Knipperen tijdens
-    // onkwetsbaarheid
+    ctx.fillText(
 
-    if (
+      "Druk op ▶️ om verder te gaan",
 
-        !invincible ||
+      canvas.width / 2,
+      325
 
-        Math.floor(
-            Date.now() / 100
-        ) % 2 === 0
-
-    ) {
-
-        drawCar(
-            player,
-            "#00e676"
-        );
-
-    }
+    );
 
 
-    // Pauze
+    ctx.textAlign = "left";
 
-    if (paused) {
+  }
 
-        ctx.fillStyle =
-            "rgba(0,0,0,0.65)";
-
-        ctx.fillRect(
-
-            0,
-            0,
-
-            canvas.width,
-            canvas.height
-
-        );
+}
 
 
-        ctx.fillStyle =
-            "white";
+// =========================
+// GAME OVER SCHERM
+// =========================
 
-        ctx.font =
-            "bold 45px Arial";
+function drawGameOver() {
 
-        ctx.textAlign =
-            "center";
-
-
-        ctx.fillText(
-
-            "PAUZE",
-
-            canvas.width / 2,
-            280
-
-        );
+  if (!gameOver) {
+    return;
+  }
 
 
-        ctx.font =
-            "20px Arial";
+  ctx.fillStyle =
+    "rgba(0,0,0,0.7)";
 
 
-        ctx.fillText(
+  ctx.fillRect(
 
-            "Druk op ▶️ om verder te gaan",
+    0,
+    0,
+    canvas.width,
+    canvas.height
 
-            canvas.width / 2,
-            325
-
-        );
+  );
 
 
-        ctx.textAlign =
-            "left";
+  ctx.fillStyle = "white";
 
-    }
+  ctx.textAlign = "center";
+
+
+  ctx.font =
+    "bold 42px Arial";
+
+
+  ctx.fillText(
+
+    "GAME OVER",
+
+    canvas.width / 2,
+    270
+
+  );
+
+
+  ctx.font =
+    "22px Arial";
+
+
+  ctx.fillText(
+
+    "Score: " + score,
+
+    canvas.width / 2,
+    315
+
+  );
+
+
+  ctx.fillText(
+
+    "Level: " + level,
+
+    canvas.width / 2,
+    350
+
+  );
+
+
+  ctx.textAlign = "left";
 
 }
 
@@ -918,15 +891,26 @@ function draw() {
 
 function gameLoop() {
 
-    update();
+  update();
 
-    draw();
+  draw();
 
-    requestAnimationFrame(
-        gameLoop
-    );
+  drawGameOver();
+
+  requestAnimationFrame(
+    gameLoop
+  );
 
 }
 
 
+// =========================
+// START
+// =========================
+
+updateLives();
+
+updateLevel();
+
 gameLoop();
+```
