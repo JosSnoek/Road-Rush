@@ -1,3 +1,5 @@
+alert("SCRIPT WERKT!");
+
 "use strict";
 
 // ============================
