@@ -29,6 +29,31 @@ let roadOffset = 0;
 
 
 // =========================
+// LEVENS
+// =========================
+
+function updateLives() {
+
+  if (lives === 3) {
+    livesElement.textContent = "❤️ ❤️ ❤️";
+  }
+
+  if (lives === 2) {
+    livesElement.textContent = "❤️ ❤️ 🖤";
+  }
+
+  if (lives === 1) {
+    livesElement.textContent = "❤️ 🖤 🖤";
+  }
+
+  if (lives <= 0) {
+    livesElement.textContent = "🖤 🖤 🖤";
+  }
+
+}
+
+
+// =========================
 // PC BESTURING
 // =========================
 
@@ -68,13 +93,9 @@ function togglePause() {
   paused = !paused;
 
   if (paused) {
-
     pauseButton.textContent = "▶️";
-
   } else {
-
     pauseButton.textContent = "⏸️";
-
   }
 
 }
@@ -117,7 +138,6 @@ function stopRight(e) {
 }
 
 
-// Linker knop
 leftButton.addEventListener("touchstart", startLeft, {
   passive: false
 });
@@ -130,12 +150,7 @@ leftButton.addEventListener("touchcancel", stopLeft, {
   passive: false
 });
 
-leftButton.addEventListener("mousedown", startLeft);
-leftButton.addEventListener("mouseup", stopLeft);
-leftButton.addEventListener("mouseleave", stopLeft);
 
-
-// Rechter knop
 rightButton.addEventListener("touchstart", startRight, {
   passive: false
 });
@@ -145,8 +160,12 @@ rightButton.addEventListener("touchend", stopRight, {
 });
 
 rightButton.addEventListener("touchcancel", stopRight, {
-  passive: false
-});
+  passive: false);
+
+
+leftButton.addEventListener("mousedown", startLeft);
+leftButton.addEventListener("mouseup", stopLeft);
+leftButton.addEventListener("mouseleave", stopLeft);
 
 rightButton.addEventListener("mousedown", startRight);
 rightButton.addEventListener("mouseup", stopRight);
@@ -154,20 +173,7 @@ rightButton.addEventListener("mouseleave", stopRight);
 
 
 // =========================
-// LEVENS
-// =========================
-
-function updateLives() {
-
-  livesElement.textContent =
-    "❤️".repeat(lives) +
-    "🖤".repeat(3 - lives);
-
-}
-
-
-// =========================
-// VIJANDAUTO MAKEN
+// VIJANDAUTO
 // =========================
 
 function spawnEnemy() {
@@ -178,15 +184,11 @@ function spawnEnemy() {
     lanes[Math.floor(Math.random() * lanes.length)];
 
   enemies.push({
-
     x: randomLane,
     y: -80,
-
     width: 40,
     height: 70,
-
     speed: 4 + Math.random() * 2
-
   });
 
 }
@@ -199,12 +201,10 @@ function spawnEnemy() {
 function collision(a, b) {
 
   return (
-
     a.x < b.x + b.width &&
     a.x + a.width > b.x &&
     a.y < b.y + b.height &&
     a.y + a.height > b.y
-
   );
 
 }
@@ -216,7 +216,6 @@ function collision(a, b) {
 
 function drawCar(car, color) {
 
-  // Schaduw
   ctx.fillStyle = "rgba(0,0,0,0.4)";
 
   ctx.fillRect(
@@ -226,8 +225,6 @@ function drawCar(car, color) {
     car.height
   );
 
-
-  // Auto
   ctx.fillStyle = color;
 
   ctx.fillRect(
@@ -237,8 +234,6 @@ function drawCar(car, color) {
     car.height
   );
 
-
-  // Voorruit
   ctx.fillStyle = "#111";
 
   ctx.fillRect(
@@ -248,8 +243,6 @@ function drawCar(car, color) {
     20
   );
 
-
-  // Achterruit
   ctx.fillRect(
     car.x + 7,
     car.y + 40,
@@ -257,8 +250,6 @@ function drawCar(car, color) {
     15
   );
 
-
-  // Wielen
   ctx.fillStyle = "#000";
 
   ctx.fillRect(
@@ -298,7 +289,6 @@ function drawCar(car, color) {
 
 function drawRoad() {
 
-  // Gras
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
@@ -308,8 +298,6 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Weg
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
@@ -319,8 +307,6 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Witte randen
   ctx.fillStyle = "white";
 
   ctx.fillRect(
@@ -337,22 +323,15 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Middenstrepen
   ctx.fillStyle = "white";
 
   if (!paused) {
-
     roadOffset += 7;
-
   }
 
   if (roadOffset >= 60) {
-
     roadOffset = 0;
-
   }
-
 
   for (
     let y = -60 + roadOffset;
@@ -383,7 +362,6 @@ function update() {
   }
 
 
-  // Links op PC / telefoon
   if (
     keys["arrowleft"] ||
     keys["a"] ||
@@ -395,7 +373,6 @@ function update() {
   }
 
 
-  // Rechts op PC / telefoon
   if (
     keys["arrowright"] ||
     keys["d"] ||
@@ -407,21 +384,15 @@ function update() {
   }
 
 
-  // Auto binnen de weg houden
   if (player.x < 45) {
-
     player.x = 45;
-
   }
 
   if (player.x > 315) {
-
     player.x = 315;
-
   }
 
 
-  // Vijanden spawnen
   spawnTimer++;
 
   if (spawnTimer > 60) {
@@ -433,7 +404,6 @@ function update() {
   }
 
 
-  // Vijanden bewegen
   for (
     let i = enemies.length - 1;
     i >= 0;
@@ -445,7 +415,7 @@ function update() {
     enemy.y += enemy.speed;
 
 
-    // Botsing
+    // BOTSING
     if (collision(player, enemy)) {
 
       enemies.splice(i, 1);
@@ -454,16 +424,9 @@ function update() {
 
       updateLives();
 
-
-      // Nog levens over
-      if (lives > 0) {
-
-        player.x = 180;
-
-      }
+      player.x = 180;
 
 
-      // Geen levens meer
       if (lives <= 0) {
 
         gameOver = true;
@@ -471,8 +434,7 @@ function update() {
         setTimeout(function() {
 
           alert(
-            "💥 GAME OVER!\n\nScore: " +
-            score
+            "💥 GAME OVER!\n\nScore: " + score
           );
 
           location.reload();
@@ -486,7 +448,6 @@ function update() {
     }
 
 
-    // Vijand voorbij
     if (enemy.y > canvas.height) {
 
       enemies.splice(i, 1);
@@ -516,11 +477,9 @@ function draw() {
     canvas.height
   );
 
-
   drawRoad();
 
 
-  // Vijanden
   enemies.forEach(function(enemy) {
 
     drawCar(
@@ -531,16 +490,11 @@ function draw() {
   });
 
 
-  // Speler
   drawCar(
     player,
     "#00e676"
   );
 
-
-  // =========================
-  // PAUZE SCHERM
-  // =========================
 
   if (paused) {
 
@@ -553,7 +507,6 @@ function draw() {
       canvas.width,
       canvas.height
     );
-
 
     ctx.fillStyle = "white";
 
@@ -568,7 +521,6 @@ function draw() {
       280
     );
 
-
     ctx.font =
       "20px Arial";
 
@@ -577,7 +529,6 @@ function draw() {
       canvas.width / 2,
       325
     );
-
 
     ctx.textAlign = "left";
 
@@ -596,9 +547,7 @@ function gameLoop() {
 
   draw();
 
-  requestAnimationFrame(
-    gameLoop
-  );
+  requestAnimationFrame(gameLoop);
 
 }
 
