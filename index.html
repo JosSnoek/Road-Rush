@@ -3,22 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Road Rush Test</title>
+  <title>Road Rush</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
-<body style="background:black;color:white;text-align:center;font-family:Arial;">
+<body>
 
-<h1>ROAD RUSH</h1>
+  <div id="game">
 
-<p>GitHub Pages werkt!</p>
+    <div id="topbar">
+      <div id="score">Score: 0</div>
+      <div id="level">Level: 1</div>
+      <div id="lives">❤️ ❤️ ❤️</div>
+      <button id="pauseButton">⏸️</button>
+    </div>
 
-<div style="
-  width:300px;
-  height:300px;
-  background:red;
-  margin:auto;
-">
-</div>
+    <canvas id="canvas" width="400" height="600"></canvas>
+
+    <div id="controls">
+      <button id="leftButton">⬅️</button>
+      <button id="rightButton">➡️</button>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
 
 </body>
 </html>
