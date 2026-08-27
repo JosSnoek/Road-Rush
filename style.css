@@ -25,6 +25,8 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 5px 10px;
+  position: relative;
+  z-index: 2;
 }
 
 #score {
@@ -80,24 +82,33 @@ canvas {
   background: #ccc;
 }
 
-/* Op kleinere telefoons */
+/* Telefoon */
 @media (max-width: 420px) {
 
   #topbar {
     height: 55px;
+    padding: 5px 12px;
+    transform: translateY(15px);
   }
 
   #score {
     font-size: 22px;
   }
 
+  #pauseButton {
+    width: 50px;
+    height: 45px;
+  }
+
   #controls {
     padding: 10px;
     gap: 10px;
+    transform: translateY(-25px);
   }
 
   #controls button {
     width: 45%;
     height: 65px;
+    font-size: 38px;
   }
 }
