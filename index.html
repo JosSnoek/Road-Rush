@@ -1,37 +1,87 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
   <title>Road Rush</title>
-  <link rel="stylesheet" href="style.css">
+
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-  <main id="game">
+  <div id="game">
 
-    <header id="topbar">
+    <div id="topbar">
       <div id="score">Score: 0</div>
       <div id="level">Level: 1</div>
       <div id="lives">❤️ ❤️ ❤️</div>
-      <button id="pauseButton" type="button">⏸️</button>
-    </header>
 
-    <canvas id="canvas" width="400" height="600"></canvas>
+      <button id="pauseButton">
+        ⏸️
+      </button>
+    </div>
+
+    <canvas
+      id="canvas"
+      width="400"
+      height="600">
+    </canvas>
 
     <div id="controls">
-      <button id="leftButton" type="button">⬅️</button>
-      <button id="rightButton" type="button">➡️</button>
+
+      <button id="leftButton">
+        ⬅️
+      </button>
+
+      <button id="rightButton">
+        ➡️
+      </button>
+
     </div>
 
     <p id="help">
-      PC: ← → of A / D &nbsp; | &nbsp; Telefoon: gebruik de knoppen
+      PC: ← → of A / D |
+      Telefoon: gebruik de knoppen
     </p>
 
-    <script>
-alert("JAVASCRIPT WERKT!");
-</script>
+  </div>
+
+
+  <!-- TEST -->
+  <script>
+
+    alert("GAME JAVASCRIPT WERKT!");
+
+    const canvas =
+      document.getElementById("canvas");
+
+    const ctx =
+      canvas.getContext("2d");
+
+    // Testtekening
+    ctx.fillStyle = "#333";
+
+    ctx.fillRect(
+      35,
+      0,
+      330,
+      600
+    );
+
+    ctx.fillStyle = "white";
+
+    ctx.fillRect(
+      195,
+      0,
+      10,
+      600
+    );
+
+  </script>
 
 </body>
 </html>
