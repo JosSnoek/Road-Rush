@@ -2,321 +2,931 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
   <title>Road Rush</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #111;
-      color: white;
-      font-family: Arial;
-      text-align: center;
-    }
-
-    #game {
-      width: 400px;
-      max-width: 100%;
-      margin: auto;
-    }
-
-    #top {
-      height: 60px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      font-weight: bold;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-      border: 3px solid white;
-    }
-
-    #buttons {
-      display: flex;
-      gap: 10px;
-      padding: 15px;
-    }
-
-    button {
-      flex: 1;
-      height: 70px;
-      font-size: 40px;
-      border: 0;
-      border-radius: 15px;
-    }
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
 
-<div id="game">
+  <div id="game">
 
-  <div id="top">
+    <div id="topbar">
 
-    <span id="score">
-      Score: 0
-    </span>
+      <div id="score">
+        Score: 0
+      </div>
 
-    <span id="level">
-      Level: 1
-    </span>
+      <div id="level">
+        Level: 1
+      </div>
 
-    <span id="lives">
-      ❤️❤️❤️
-    </span>
+      <div id="lives">
+        ❤️ ❤️ ❤️
+      </div>
+
+      <button id="pauseButton">
+        ⏸️
+      </button>
+
+    </div>
+
+
+    <canvas
+      id="canvas"
+      width="400"
+      height="600">
+    </canvas>
+
+
+    <div id="controls">
+
+      <button id="leftButton">
+        ⬅️
+      </button>
+
+      <button id="rightButton">
+        ➡️
+      </button>
+
+    </div>
+
+
+    <div id="help">
+      PC: ← → of A / D<br>
+      Telefoon: gebruik de knoppen
+    </div>
 
   </div>
 
-  <canvas
-    id="canvas"
-    width="400"
-    height="600">
-  </canvas>
 
-  <div id="buttons">
+  <script>
 
-    <button id="left">
-      ⬅️
-    </button>
+    // =================================
+    // ROAD RUSH
+    // =================================
 
-    <button id="right">
-      ➡️
-    </button>
+    const canvas =
+      document.getElementById("canvas");
 
-  </div>
+    const ctx =
+      canvas.getContext("2d");
 
-</div>
 
+    // =================================
+    // TEKST
+    // =================================
 
-<script>
+    const scoreElement =
+      document.getElementById("score");
 
-const canvas =
-  document.getElementById("canvas");
+    const levelElement =
+      document.getElementById("level");
 
-const ctx =
-  canvas.getContext("2d");
+    const livesElement =
+      document.getElementById("lives");
 
-const player = {
 
-  x: 180,
+    // =================================
+    // KNOPPEN
+    // =================================
 
-  y: 500,
+    const pauseButton =
+      document.getElementById("pauseButton");
 
-  width: 40,
+    const leftButton =
+      document.getElementById("leftButton");
 
-  height: 70,
+    const rightButton =
+      document.getElementById("rightButton");
 
-  speed: 6
 
-};
+    // =================================
+    // GAME
+    // =================================
 
+    let score = 0;
 
-let left = false;
-let right = false;
+    let level = 1;
 
+    let lives = 3;
 
-// TELEFOON
+    let paused = false;
 
-document
-  .getElementById("left")
-  .addEventListener("pointerdown", () => {
+    let gameOver = false;
 
-    left = true;
+    let spawnTimer = 0;
 
-  });
+    let roadOffset = 0;
 
-document
-  .getElementById("left")
-  .addEventListener("pointerup", () => {
 
-    left = false;
+    // =================================
+    // BESTURING
+    // =================================
 
-  });
+    let moveLeft = false;
 
+    let moveRight = false;
 
-document
-  .getElementById("right")
-  .addEventListener("pointerdown", () => {
 
-    right = true;
+    // =================================
+    // SPELER
+    // =================================
 
-  });
+    const player = {
 
-document
-  .getElementById("right")
-  .addEventListener("pointerup", () => {
+      x: 180,
 
-    right = false;
+      y: 500,
 
-  });
+      width: 40,
 
+      height: 70,
 
-// PC
+      speed: 6
 
-document.addEventListener("keydown", event => {
+    };
 
-  if (
-    event.key === "ArrowLeft" ||
-    event.key.toLowerCase() === "a"
-  ) {
 
-    left = true;
+    // =================================
+    // VIJANDEN
+    // =================================
 
-  }
+    let enemies = [];
 
-  if (
-    event.key === "ArrowRight" ||
-    event.key.toLowerCase() === "d"
-  ) {
 
-    right = true;
+    // =================================
+    // PC BESTURING
+    // =================================
 
-  }
+    document.addEventListener(
+      "keydown",
+      function(event) {
 
-});
+        if (
+          event.key === "ArrowLeft" ||
+          event.key.toLowerCase() === "a"
+        ) {
 
+          moveLeft = true;
 
-document.addEventListener("keyup", event => {
+        }
 
-  if (
-    event.key === "ArrowLeft" ||
-    event.key.toLowerCase() === "a"
-  ) {
 
-    left = false;
+        if (
+          event.key === "ArrowRight" ||
+          event.key.toLowerCase() === "d"
+        ) {
 
-  }
+          moveRight = true;
 
-  if (
-    event.key === "ArrowRight" ||
-    event.key.toLowerCase() === "d"
-  ) {
+        }
 
-    right = false;
 
-  }
+        if (event.code === "Space") {
 
-});
+          event.preventDefault();
 
+          togglePause();
 
-// TEKENEN
+        }
 
-function draw() {
+      }
+    );
 
-  // GROENE ACHTERGROND
 
-  ctx.fillStyle = "#198a35";
+    document.addEventListener(
+      "keyup",
+      function(event) {
 
-  ctx.fillRect(
-    0,
-    0,
-    400,
-    600
-  );
+        if (
+          event.key === "ArrowLeft" ||
+          event.key.toLowerCase() === "a"
+        ) {
 
+          moveLeft = false;
 
-  // WEG
+        }
 
-  ctx.fillStyle = "#333";
 
-  ctx.fillRect(
-    35,
-    0,
-    330,
-    600
-  );
+        if (
+          event.key === "ArrowRight" ||
+          event.key.toLowerCase() === "d"
+        ) {
 
+          moveRight = false;
 
-  // MIDDENSTREEP
+        }
 
-  ctx.fillStyle = "white";
+      }
+    );
 
-  ctx.fillRect(
-    195,
-    0,
-    10,
-    600
-  );
 
+    // =================================
+    // TELEFOON BESTURING
+    // =================================
 
-  // AUTO
+    function leftStart(event) {
 
-  ctx.fillStyle = "#00e676";
+      event.preventDefault();
 
-  ctx.fillRect(
-    player.x,
-    player.y,
-    player.width,
-    player.height
-  );
+      moveLeft = true;
 
+    }
 
-  // VOORRUIT
 
-  ctx.fillStyle = "#111";
+    function leftStop(event) {
 
-  ctx.fillRect(
-    player.x + 7,
-    player.y + 10,
-    26,
-    20
-  );
+      event.preventDefault();
 
-}
+      moveLeft = false;
 
+    }
 
-// UPDATE
 
-function update() {
+    function rightStart(event) {
 
-  if (left) {
+      event.preventDefault();
 
-    player.x -= player.speed;
+      moveRight = true;
 
-  }
+    }
 
-  if (right) {
 
-    player.x += player.speed;
+    function rightStop(event) {
 
-  }
+      event.preventDefault();
 
+      moveRight = false;
 
-  if (player.x < 45) {
+    }
 
-    player.x = 45;
 
-  }
+    leftButton.addEventListener(
+      "pointerdown",
+      leftStart
+    );
 
-  if (player.x > 315) {
+    leftButton.addEventListener(
+      "pointerup",
+      leftStop
+    );
 
-    player.x = 315;
+    leftButton.addEventListener(
+      "pointercancel",
+      leftStop
+    );
 
-  }
+    leftButton.addEventListener(
+      "pointerleave",
+      leftStop
+    );
 
-}
 
+    rightButton.addEventListener(
+      "pointerdown",
+      rightStart
+    );
 
-// LOOP
+    rightButton.addEventListener(
+      "pointerup",
+      rightStop
+    );
 
-function gameLoop() {
+    rightButton.addEventListener(
+      "pointercancel",
+      rightStop
+    );
 
-  update();
+    rightButton.addEventListener(
+      "pointerleave",
+      rightStop
+    );
 
-  draw();
 
-  requestAnimationFrame(gameLoop);
+    // =================================
+    // PAUZE
+    // =================================
 
-}
+    pauseButton.addEventListener(
+      "click",
+      togglePause
+    );
 
 
-gameLoop();
+    function togglePause() {
 
-</script>
+      if (gameOver) {
+        return;
+      }
+
+      paused = !paused;
+
+      if (paused) {
+
+        pauseButton.textContent = "▶️";
+
+      } else {
+
+        pauseButton.textContent = "⏸️";
+
+      }
+
+    }
+
+
+    // =================================
+    // UI
+    // =================================
+
+    function updateUI() {
+
+      scoreElement.textContent =
+        "Score: " + score;
+
+      levelElement.textContent =
+        "Level: " + level;
+
+
+      if (lives === 3) {
+
+        livesElement.textContent =
+          "❤️ ❤️ ❤️";
+
+      }
+
+      else if (lives === 2) {
+
+        livesElement.textContent =
+          "❤️ ❤️ 🖤";
+
+      }
+
+      else if (lives === 1) {
+
+        livesElement.textContent =
+          "❤️ 🖤 🖤";
+
+      }
+
+      else {
+
+        livesElement.textContent =
+          "🖤 🖤 🖤";
+
+      }
+
+    }
+
+
+    // =================================
+    // VIJAND MAKEN
+    // =================================
+
+    function spawnEnemy() {
+
+      const lanes = [
+        80,
+        180,
+        280
+      ];
+
+
+      const lane =
+        lanes[
+          Math.floor(
+            Math.random() * lanes.length
+          )
+        ];
+
+
+      // Elke level sneller
+
+      const speed =
+        2 +
+        (level - 1) * 0.7 +
+        Math.random() * 0.7;
+
+
+      enemies.push({
+
+        x: lane,
+
+        y: -80,
+
+        width: 40,
+
+        height: 70,
+
+        speed: speed
+
+      });
+
+    }
+
+
+    // =================================
+    // BOTSING
+    // =================================
+
+    function collision(a, b) {
+
+      return (
+
+        a.x < b.x + b.width &&
+
+        a.x + a.width > b.x &&
+
+        a.y < b.y + b.height &&
+
+        a.y + a.height > b.y
+
+      );
+
+    }
+
+
+    // =================================
+    // LEVEN VERLIEZEN
+    // =================================
+
+    function loseLife() {
+
+      lives--;
+
+      updateUI();
+
+
+      // Auto's verwijderen
+
+      enemies = [];
+
+
+      // Speler terug naar midden
+
+      player.x = 180;
+
+
+      // Even rustig opnieuw beginnen
+
+      spawnTimer = 0;
+
+
+      if (lives <= 0) {
+
+        gameOver = true;
+
+
+        setTimeout(
+          function() {
+
+            alert(
+              "💥 GAME OVER!\n\n" +
+              "Score: " + score +
+              "\nLevel: " + level
+            );
+
+            location.reload();
+
+          },
+          200
+        );
+
+      }
+
+    }
+
+
+    // =================================
+    // AUTO TEKENEN
+    // =================================
+
+    function drawCar(car, color) {
+
+      // Schaduw
+
+      ctx.fillStyle =
+        "rgba(0,0,0,0.35)";
+
+      ctx.fillRect(
+        car.x + 4,
+        car.y + 5,
+        car.width,
+        car.height
+      );
+
+
+      // Auto
+
+      ctx.fillStyle = color;
+
+      ctx.fillRect(
+        car.x,
+        car.y,
+        car.width,
+        car.height
+      );
+
+
+      // Voorruit
+
+      ctx.fillStyle = "#111";
+
+      ctx.fillRect(
+        car.x + 7,
+        car.y + 10,
+        car.width - 14,
+        20
+      );
+
+
+      // Achterruit
+
+      ctx.fillRect(
+        car.x + 7,
+        car.y + 40,
+        car.width - 14,
+        15
+      );
+
+
+      // Wielen
+
+      ctx.fillStyle = "#000";
+
+
+      ctx.fillRect(
+        car.x - 5,
+        car.y + 10,
+        6,
+        20
+      );
+
+
+      ctx.fillRect(
+        car.x + car.width - 1,
+        car.y + 10,
+        6,
+        20
+      );
+
+
+      ctx.fillRect(
+        car.x - 5,
+        car.y + 45,
+        6,
+        20
+      );
+
+
+      ctx.fillRect(
+        car.x + car.width - 1,
+        car.y + 45,
+        6,
+        20
+      );
+
+    }
+
+
+    // =================================
+    // WEG
+    // =================================
+
+    function drawRoad() {
+
+      // Gras
+
+      ctx.fillStyle = "#198a35";
+
+      ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+
+      // Weg
+
+      ctx.fillStyle = "#3d3d3d";
+
+      ctx.fillRect(
+        35,
+        0,
+        330,
+        canvas.height
+      );
+
+
+      // Randen
+
+      ctx.fillStyle = "white";
+
+      ctx.fillRect(
+        35,
+        0,
+        5,
+        canvas.height
+      );
+
+
+      ctx.fillRect(
+        360,
+        0,
+        5,
+        canvas.height
+      );
+
+
+      // Middenstrepen
+
+      if (!paused) {
+
+        roadOffset +=
+          4 + level * 0.4;
+
+      }
+
+
+      if (roadOffset >= 60) {
+
+        roadOffset = 0;
+
+      }
+
+
+      for (
+        let y = -60 + roadOffset;
+        y < canvas.height;
+        y += 60
+      ) {
+
+        ctx.fillRect(
+          195,
+          y,
+          10,
+          35
+        );
+
+      }
+
+    }
+
+
+    // =================================
+    // UPDATE
+    // =================================
+
+    function update() {
+
+      if (
+        paused ||
+        gameOver
+      ) {
+
+        return;
+
+      }
+
+
+      // Links
+
+      if (moveLeft) {
+
+        player.x -=
+          player.speed;
+
+      }
+
+
+      // Rechts
+
+      if (moveRight) {
+
+        player.x +=
+          player.speed;
+
+      }
+
+
+      // Binnen de weg
+
+      if (player.x < 45) {
+
+        player.x = 45;
+
+      }
+
+
+      if (player.x > 315) {
+
+        player.x = 315;
+
+      }
+
+
+      // Vijanden maken
+
+      spawnTimer++;
+
+
+      const spawnDelay =
+        Math.max(
+          35,
+          90 - level * 5
+        );
+
+
+      if (
+        spawnTimer >=
+        spawnDelay
+      ) {
+
+        spawnEnemy();
+
+        spawnTimer = 0;
+
+      }
+
+
+      // Vijanden bewegen
+
+      for (
+        let i = enemies.length - 1;
+        i >= 0;
+        i--
+      ) {
+
+        const enemy =
+          enemies[i];
+
+
+        enemy.y +=
+          enemy.speed;
+
+
+        // Botsing
+
+        if (
+          collision(
+            player,
+            enemy
+          )
+        ) {
+
+          enemies.splice(i, 1);
+
+          loseLife();
+
+          return;
+
+        }
+
+
+        // Auto voorbij
+
+        if (
+          enemy.y >
+          canvas.height
+        ) {
+
+          enemies.splice(i, 1);
+
+          score++;
+
+
+          // Elke 10 punten
+          // een nieuw level
+
+          level =
+            Math.floor(
+              score / 10
+            ) + 1;
+
+
+          updateUI();
+
+        }
+
+      }
+
+    }
+
+
+    // =================================
+    // TEKENEN
+    // =================================
+
+    function draw() {
+
+      ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+
+      drawRoad();
+
+
+      // Vijanden
+
+      enemies.forEach(
+        function(enemy) {
+
+          drawCar(
+            enemy,
+            "#e53935"
+          );
+
+        }
+      );
+
+
+      // Speler
+
+      drawCar(
+        player,
+        "#00e676"
+      );
+
+
+      // Pauze scherm
+
+      if (paused) {
+
+        ctx.fillStyle =
+          "rgba(0,0,0,0.7)";
+
+        ctx.fillRect(
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+
+
+        ctx.fillStyle = "white";
+
+        ctx.textAlign = "center";
+
+        ctx.font =
+          "bold 45px Arial";
+
+        ctx.fillText(
+          "PAUZE",
+          canvas.width / 2,
+          280
+        );
+
+
+        ctx.font =
+          "20px Arial";
+
+        ctx.fillText(
+          "Druk op ▶️",
+          canvas.width / 2,
+          325
+        );
+
+
+        ctx.textAlign = "left";
+
+      }
+
+    }
+
+
+    // =================================
+    // GAME LOOP
+    // =================================
+
+    function gameLoop() {
+
+      update();
+
+      draw();
+
+      requestAnimationFrame(
+        gameLoop
+      );
+
+    }
+
+
+    // =================================
+    // START
+    // =================================
+
+    updateUI();
+
+    gameLoop();
+
+  </script>
 
 </body>
 </html>
