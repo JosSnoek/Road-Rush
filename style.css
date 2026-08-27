@@ -15,7 +15,8 @@ body {
   background: #111;
   color: white;
   font-family: Arial, sans-serif;
-  overflow: hidden;
+  text-align: center;
+  overflow-x: hidden;
   touch-action: none;
 }
 
@@ -23,32 +24,37 @@ body {
   width: 100%;
   max-width: 400px;
   margin: 0 auto;
+  padding-bottom: 10px;
 }
 
 #topbar {
-  height: 60px;
+  width: 100%;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 5px;
-  padding: 5px 8px;
-  font-weight: bold;
+  padding: 8px;
 }
 
 #score,
 #level,
 #lives {
-  font-size: 18px;
+  font-size: 17px;
+  font-weight: bold;
   white-space: nowrap;
 }
 
 #pauseButton {
-  width: 45px;
-  height: 45px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: 0;
   border-radius: 10px;
   background: white;
-  font-size: 22px;
+  font-size: 21px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 #canvas {
@@ -62,20 +68,24 @@ body {
 
 #controls {
   display: flex;
-  justify-content: space-between;
-  gap: 15px;
-  padding: 15px 10px;
+  width: 100%;
+  gap: 12px;
+  padding: 14px 8px 8px;
 }
 
 #controls button {
   flex: 1;
-  height: 70px;
+  height: 75px;
   border: 0;
-  border-radius: 15px;
+  border-radius: 16px;
   background: white;
-  font-size: 38px;
+  color: black;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
   touch-action: none;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 #controls button:active,
@@ -84,32 +94,45 @@ body {
   background: #ccc;
 }
 
+#help {
+  margin: 5px 8px 0;
+  color: #aaa;
+  font-size: 12px;
+}
+
 @media (max-width: 420px) {
 
+  #game {
+    max-width: 100%;
+  }
+
   #topbar {
-    height: 55px;
-    padding: 5px 6px;
+    min-height: 52px;
+    padding: 5px 7px;
   }
 
   #score,
   #level,
   #lives {
-    font-size: 15px;
+    font-size: 14px;
   }
 
   #pauseButton {
     width: 42px;
     height: 42px;
-    font-size: 20px;
+    font-size: 19px;
   }
 
   #controls {
-    padding: 12px 8px 25px;
-    gap: 12px;
+    padding: 12px 8px 8px;
   }
 
   #controls button {
-    height: 75px;
-    font-size: 40px;
+    height: 72px;
+    font-size: 38px;
+  }
+
+  #help {
+    font-size: 11px;
   }
 }
