@@ -2,32 +2,36 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Road Rush</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div id="game">
+  <main id="game">
 
-    <div id="topbar">
+    <header id="topbar">
       <div id="score">Score: 0</div>
       <div id="level">Level: 1</div>
       <div id="lives">❤️ ❤️ ❤️</div>
-      <button id="pauseButton">⏸️</button>
-    </div>
+      <button id="pauseButton" type="button">⏸️</button>
+    </header>
 
     <canvas id="canvas" width="400" height="600"></canvas>
 
     <div id="controls">
-      <button id="leftButton">⬅️</button>
-      <button id="rightButton">➡️</button>
+      <button id="leftButton" type="button">⬅️</button>
+      <button id="rightButton" type="button">➡️</button>
     </div>
 
-  </div>
+    <p id="help">
+      PC: ← → of A / D &nbsp; | &nbsp; Telefoon: gebruik de knoppen
+    </p>
 
-  <script src="script.js"></script>
+  </main>
+
+  <script src="./script.js"></script>
 
 </body>
 </html>
