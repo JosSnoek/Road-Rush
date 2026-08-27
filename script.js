@@ -33,23 +33,7 @@ let roadOffset = 0;
 // =========================
 
 function updateLives() {
-
-  if (lives === 3) {
-    livesElement.textContent = "❤️ ❤️ ❤️";
-  }
-
-  if (lives === 2) {
-    livesElement.textContent = "❤️ ❤️ 🖤";
-  }
-
-  if (lives === 1) {
-    livesElement.textContent = "❤️ 🖤 🖤";
-  }
-
-  if (lives <= 0) {
-    livesElement.textContent = "🖤 🖤 🖤";
-  }
-
+  livesElement.textContent = "❤️".repeat(lives) + "🖤".repeat(3 - lives);
 }
 
 
@@ -62,11 +46,8 @@ document.addEventListener("keydown", function(e) {
   keys[e.key.toLowerCase()] = true;
 
   if (e.code === "Space") {
-
     e.preventDefault();
-
     togglePause();
-
   }
 
 });
@@ -106,62 +87,33 @@ function togglePause() {
 // =========================
 
 function startLeft(e) {
-
   e.preventDefault();
-
   keys["mobileleft"] = true;
-
 }
 
 function stopLeft(e) {
-
   e.preventDefault();
-
   keys["mobileleft"] = false;
-
 }
 
 function startRight(e) {
-
   e.preventDefault();
-
   keys["mobileright"] = true;
-
 }
 
 function stopRight(e) {
-
   e.preventDefault();
-
   keys["mobileright"] = false;
-
 }
 
 
-leftButton.addEventListener("touchstart", startLeft, {
-  passive: false
-});
+leftButton.addEventListener("touchstart", startLeft, { passive: false });
+leftButton.addEventListener("touchend", stopLeft, { passive: false });
+leftButton.addEventListener("touchcancel", stopLeft, { passive: false });
 
-leftButton.addEventListener("touchend", stopLeft, {
-  passive: false
-});
-
-leftButton.addEventListener("touchcancel", stopLeft, {
-  passive: false
-});
-
-
-rightButton.addEventListener("touchstart", startRight, {
-  passive: false
-});
-
-rightButton.addEventListener("touchend", stopRight, {
-  passive: false
-});
-
-rightButton.addEventListener("touchcancel", stopRight, {
-  passive: false);
-
+rightButton.addEventListener("touchstart", startRight, { passive: false });
+rightButton.addEventListener("touchend", stopRight, { passive: false });
+rightButton.addEventListener("touchcancel", stopRight, { passive: false });
 
 leftButton.addEventListener("mousedown", startLeft);
 leftButton.addEventListener("mouseup", stopLeft);
@@ -184,11 +136,15 @@ function spawnEnemy() {
     lanes[Math.floor(Math.random() * lanes.length)];
 
   enemies.push({
+
     x: randomLane,
     y: -80,
+
     width: 40,
     height: 70,
+
     speed: 4 + Math.random() * 2
+
   });
 
 }
@@ -211,11 +167,53 @@ function collision(a, b) {
 
 
 // =========================
+// BOTSING VERWERKEN
+// =========================
+
+function hitPlayer(enemy, index) {
+
+  // Vijand verwijderen
+  enemies.splice(index, 1);
+
+  // 1 leven eraf
+  lives--;
+
+  updateLives();
+
+  // Auto terug naar het midden
+  player.x = 180;
+
+  // Als alle levens op zijn
+  if (lives <= 0) {
+
+    lives = 0;
+    updateLives();
+
+    gameOver = true;
+
+    setTimeout(function() {
+
+      alert(
+        "💥 GAME OVER!\n\nScore: " +
+        score
+      );
+
+      location.reload();
+
+    }, 100);
+
+  }
+
+}
+
+
+// =========================
 // AUTO TEKENEN
 // =========================
 
 function drawCar(car, color) {
 
+  // Schaduw
   ctx.fillStyle = "rgba(0,0,0,0.4)";
 
   ctx.fillRect(
@@ -225,6 +223,8 @@ function drawCar(car, color) {
     car.height
   );
 
+
+  // Auto
   ctx.fillStyle = color;
 
   ctx.fillRect(
@@ -234,6 +234,8 @@ function drawCar(car, color) {
     car.height
   );
 
+
+  // Voorruit
   ctx.fillStyle = "#111";
 
   ctx.fillRect(
@@ -243,6 +245,8 @@ function drawCar(car, color) {
     20
   );
 
+
+  // Achterruit
   ctx.fillRect(
     car.x + 7,
     car.y + 40,
@@ -250,6 +254,8 @@ function drawCar(car, color) {
     15
   );
 
+
+  // Wielen
   ctx.fillStyle = "#000";
 
   ctx.fillRect(
@@ -289,6 +295,7 @@ function drawCar(car, color) {
 
 function drawRoad() {
 
+  // Gras
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
@@ -298,6 +305,8 @@ function drawRoad() {
     canvas.height
   );
 
+
+  // Weg
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
@@ -307,6 +316,8 @@ function drawRoad() {
     canvas.height
   );
 
+
+  // Witte randen
   ctx.fillStyle = "white";
 
   ctx.fillRect(
@@ -323,6 +334,8 @@ function drawRoad() {
     canvas.height
   );
 
+
+  // Middenstrepen
   ctx.fillStyle = "white";
 
   if (!paused) {
@@ -332,6 +345,7 @@ function drawRoad() {
   if (roadOffset >= 60) {
     roadOffset = 0;
   }
+
 
   for (
     let y = -60 + roadOffset;
@@ -362,6 +376,7 @@ function update() {
   }
 
 
+  // Links
   if (
     keys["arrowleft"] ||
     keys["a"] ||
@@ -373,6 +388,7 @@ function update() {
   }
 
 
+  // Rechts
   if (
     keys["arrowright"] ||
     keys["d"] ||
@@ -384,6 +400,7 @@ function update() {
   }
 
 
+  // Binnen de weg
   if (player.x < 45) {
     player.x = 45;
   }
@@ -393,6 +410,7 @@ function update() {
   }
 
 
+  // Vijanden spawnen
   spawnTimer++;
 
   if (spawnTimer > 60) {
@@ -404,6 +422,7 @@ function update() {
   }
 
 
+  // Vijanden bewegen
   for (
     let i = enemies.length - 1;
     i >= 0;
@@ -415,39 +434,22 @@ function update() {
     enemy.y += enemy.speed;
 
 
-    // BOTSING
+    // Botsing
     if (collision(player, enemy)) {
 
-      enemies.splice(i, 1);
+      hitPlayer(enemy, i);
 
-      lives--;
-
-      updateLives();
-
-      player.x = 180;
-
-
-      if (lives <= 0) {
-
-        gameOver = true;
-
-        setTimeout(function() {
-
-          alert(
-            "💥 GAME OVER!\n\nScore: " + score
-          );
-
-          location.reload();
-
-        }, 100);
-
+      // Alleen stoppen als game over is
+      if (gameOver) {
         return;
-
       }
+
+      continue;
 
     }
 
 
+    // Vijand voorbij
     if (enemy.y > canvas.height) {
 
       enemies.splice(i, 1);
@@ -477,9 +479,11 @@ function draw() {
     canvas.height
   );
 
+
   drawRoad();
 
 
+  // Vijanden
   enemies.forEach(function(enemy) {
 
     drawCar(
@@ -490,12 +494,14 @@ function draw() {
   });
 
 
+  // Speler
   drawCar(
     player,
     "#00e676"
   );
 
 
+  // Pauze
   if (paused) {
 
     ctx.fillStyle =
@@ -507,6 +513,7 @@ function draw() {
       canvas.width,
       canvas.height
     );
+
 
     ctx.fillStyle = "white";
 
@@ -521,6 +528,7 @@ function draw() {
       280
     );
 
+
     ctx.font =
       "20px Arial";
 
@@ -529,6 +537,7 @@ function draw() {
       canvas.width / 2,
       325
     );
+
 
     ctx.textAlign = "left";
 
