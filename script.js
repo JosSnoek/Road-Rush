@@ -1,9 +1,15 @@
+"use strict";
+
+// ============================
+// ELEMENTEN
+// ============================
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-const scoreText = document.getElementById("score");
-const levelText = document.getElementById("level");
-const livesText = document.getElementById("lives");
+const scoreElement = document.getElementById("score");
+const levelElement = document.getElementById("level");
+const livesElement = document.getElementById("lives");
 
 const pauseButton = document.getElementById("pauseButton");
 const leftButton = document.getElementById("leftButton");
@@ -11,7 +17,7 @@ const rightButton = document.getElementById("rightButton");
 
 
 // ============================
-// GAME
+// GAME VARIABELEN
 // ============================
 
 let score = 0;
@@ -48,10 +54,32 @@ let enemies = [];
 
 
 // ============================
-// BESTURING PC
+// UI
 // ============================
 
-document.addEventListener("keydown", function(event) {
+function updateUI() {
+
+  scoreElement.textContent = "Score: " + score;
+
+  levelElement.textContent = "Level: " + level;
+
+  if (lives === 3) {
+    livesElement.textContent = "❤️ ❤️ ❤️";
+  } else if (lives === 2) {
+    livesElement.textContent = "❤️ ❤️ 🖤";
+  } else if (lives === 1) {
+    livesElement.textContent = "❤️ 🖤 🖤";
+  } else {
+    livesElement.textContent = "🖤 🖤 🖤";
+  }
+}
+
+
+// ============================
+// PC BESTURING
+// ============================
+
+document.addEventListener("keydown", function (event) {
 
   keys[event.key.toLowerCase()] = true;
 
@@ -64,54 +92,59 @@ document.addEventListener("keydown", function(event) {
 });
 
 
-document.addEventListener("keyup", function(event) {
+document.addEventListener("keyup", function (event) {
 
   keys[event.key.toLowerCase()] = false;
 });
 
 
 // ============================
-// TELEFOON
+// TELEFOON BESTURING
 // ============================
 
-function leftDown(event) {
+function leftStart(event) {
 
   event.preventDefault();
 
-  keys.left = true;
+  keys.mobileLeft = true;
 }
 
-function leftUp(event) {
+function leftStop(event) {
 
   event.preventDefault();
 
-  keys.left = false;
+  keys.mobileLeft = false;
 }
 
-function rightDown(event) {
+function rightStart(event) {
 
   event.preventDefault();
 
-  keys.right = true;
+  keys.mobileRight = true;
 }
 
-function rightUp(event) {
+function rightStop(event) {
 
   event.preventDefault();
 
-  keys.right = false;
+  keys.mobileRight = false;
 }
 
 
-leftButton.addEventListener("pointerdown", leftDown);
-leftButton.addEventListener("pointerup", leftUp);
-leftButton.addEventListener("pointercancel", leftUp);
-leftButton.addEventListener("pointerleave", leftUp);
+// Linker knop
 
-rightButton.addEventListener("pointerdown", rightDown);
-rightButton.addEventListener("pointerup", rightUp);
-rightButton.addEventListener("pointercancel", rightUp);
-rightButton.addEventListener("pointerleave", rightUp);
+leftButton.addEventListener("pointerdown", leftStart);
+leftButton.addEventListener("pointerup", leftStop);
+leftButton.addEventListener("pointercancel", leftStop);
+leftButton.addEventListener("pointerleave", leftStop);
+
+
+// Rechter knop
+
+rightButton.addEventListener("pointerdown", rightStart);
+rightButton.addEventListener("pointerup", rightStop);
+rightButton.addEventListener("pointercancel", rightStop);
+rightButton.addEventListener("pointerleave", rightStop);
 
 
 // ============================
@@ -128,39 +161,8 @@ function togglePause() {
 
   paused = !paused;
 
-  if (paused) {
-    pauseButton.textContent = "▶️";
-  } else {
-    pauseButton.textContent = "⏸️";
-  }
-}
-
-
-// ============================
-// UI
-// ============================
-
-function updateUI() {
-
-  scoreText.textContent = "Score: " + score;
-
-  levelText.textContent = "Level: " + level;
-
-  if (lives === 3) {
-    livesText.textContent = "❤️ ❤️ ❤️";
-  }
-
-  if (lives === 2) {
-    livesText.textContent = "❤️ ❤️ 🖤";
-  }
-
-  if (lives === 1) {
-    livesText.textContent = "❤️ 🖤 🖤";
-  }
-
-  if (lives <= 0) {
-    livesText.textContent = "🖤 🖤 🖤";
-  }
+  pauseButton.textContent =
+    paused ? "▶️" : "⏸️";
 }
 
 
@@ -168,22 +170,34 @@ function updateUI() {
 // VIJAND MAKEN
 // ============================
 
-function createEnemy() {
+function spawnEnemy() {
 
   const lanes = [80, 180, 280];
 
   const lane =
     lanes[Math.floor(Math.random() * lanes.length)];
 
+  /*
+    Begin langzaam.
+
+    Level 1 = langzaam
+    Level 2 = sneller
+    Level 3 = nog sneller
+    enz.
+  */
+
+  const enemySpeed =
+    2 + (level - 1) * 0.7 + Math.random() * 0.8;
+
   enemies.push({
 
     x: lane,
     y: -80,
+
     width: 40,
     height: 70,
 
-    // Elk level sneller
-    speed: 2 + level * 0.8
+    speed: enemySpeed
   });
 }
 
@@ -192,15 +206,13 @@ function createEnemy() {
 // BOTSING
 // ============================
 
-function isCollision(a, b) {
+function collision(a, b) {
 
   return (
-
     a.x < b.x + b.width &&
     a.x + a.width > b.x &&
     a.y < b.y + b.height &&
     a.y + a.height > b.y
-
   );
 }
 
@@ -215,23 +227,25 @@ function loseLife() {
 
   updateUI();
 
-  // Alle auto's weg na botsing
+  // Vijanden verwijderen
   enemies = [];
 
-  // Speler terug naar midden
+  // Speler terug naar het midden
   player.x = 180;
 
-  // Timer resetten
+  // Nieuwe vijanden iets later
   spawnTimer = 0;
 
   if (lives <= 0) {
 
     gameOver = true;
 
-    setTimeout(function() {
+    setTimeout(function () {
 
       alert(
-        "💥 GAME OVER!\n\nScore: " + score
+        "💥 GAME OVER!\n\n" +
+        "Score: " + score +
+        "\nLevel: " + level
       );
 
       location.reload();
@@ -248,6 +262,7 @@ function loseLife() {
 function drawCar(car, color) {
 
   // Schaduw
+
   ctx.fillStyle = "rgba(0,0,0,0.35)";
 
   ctx.fillRect(
@@ -259,6 +274,7 @@ function drawCar(car, color) {
 
 
   // Auto
+
   ctx.fillStyle = color;
 
   ctx.fillRect(
@@ -270,6 +286,7 @@ function drawCar(car, color) {
 
 
   // Voorruit
+
   ctx.fillStyle = "#111";
 
   ctx.fillRect(
@@ -281,6 +298,7 @@ function drawCar(car, color) {
 
 
   // Achterruit
+
   ctx.fillRect(
     car.x + 7,
     car.y + 40,
@@ -290,6 +308,7 @@ function drawCar(car, color) {
 
 
   // Wielen
+
   ctx.fillStyle = "#000";
 
   ctx.fillRect(
@@ -323,12 +342,13 @@ function drawCar(car, color) {
 
 
 // ============================
-// WEG TEKENEN
+// WEG
 // ============================
 
 function drawRoad() {
 
   // Gras
+
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
@@ -340,6 +360,7 @@ function drawRoad() {
 
 
   // Weg
+
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
@@ -350,7 +371,8 @@ function drawRoad() {
   );
 
 
-  // Weg randen
+  // Witte randen
+
   ctx.fillStyle = "white";
 
   ctx.fillRect(
@@ -368,17 +390,18 @@ function drawRoad() {
   );
 
 
-  // Bewegende middenstrepen
+  // Middenstrepen
 
   if (!paused) {
 
-    roadOffset += 5 + level * 0.5;
+    roadOffset += 4 + level * 0.4;
   }
 
   if (roadOffset >= 60) {
 
     roadOffset = 0;
   }
+
 
   for (
     let y = -60 + roadOffset;
@@ -412,7 +435,7 @@ function update() {
   if (
     keys.arrowleft ||
     keys.a ||
-    keys.left
+    keys.mobileLeft
   ) {
 
     player.x -= player.speed;
@@ -424,42 +447,46 @@ function update() {
   if (
     keys.arrowright ||
     keys.d ||
-    keys.right
+    keys.mobileRight
   ) {
 
     player.x += player.speed;
   }
 
 
-  // Binnen de weg blijven
+  // Binnen de weg
 
   if (player.x < 45) {
-
     player.x = 45;
   }
 
   if (player.x > 315) {
-
     player.x = 315;
   }
 
 
-  // Vijanden spawnen
+  // ==========================
+  // VIJANDEN SPAWNEN
+  // ==========================
 
   spawnTimer++;
 
+  // Hogere levels = sneller nieuwe auto's
+
   const spawnDelay =
-    Math.max(35, 80 - level * 4);
+    Math.max(35, 90 - level * 5);
 
   if (spawnTimer >= spawnDelay) {
 
-    createEnemy();
+    spawnEnemy();
 
     spawnTimer = 0;
   }
 
 
-  // Vijanden bewegen
+  // ==========================
+  // VIJANDEN BEWEGEN
+  // ==========================
 
   for (
     let i = enemies.length - 1;
@@ -474,7 +501,7 @@ function update() {
 
     // Botsing
 
-    if (isCollision(player, enemy)) {
+    if (collision(player, enemy)) {
 
       enemies.splice(i, 1);
 
@@ -492,10 +519,16 @@ function update() {
 
       score++;
 
-      // Iedere 10 punten een level hoger
 
-      level =
+      // Elke 10 punten een level omhoog
+
+      const newLevel =
         Math.floor(score / 10) + 1;
+
+      if (newLevel !== level) {
+
+        level = newLevel;
+      }
 
       updateUI();
     }
@@ -539,12 +572,14 @@ function draw() {
   );
 
 
-  // Pauze
+  // ==========================
+  // PAUZE SCHERM
+  // ==========================
 
   if (paused) {
 
     ctx.fillStyle =
-      "rgba(0,0,0,0.65)";
+      "rgba(0,0,0,0.7)";
 
     ctx.fillRect(
       0,
@@ -570,7 +605,7 @@ function draw() {
       "20px Arial";
 
     ctx.fillText(
-      "Druk op ▶️",
+      "Druk op ▶️ om verder te gaan",
       canvas.width / 2,
       325
     );
