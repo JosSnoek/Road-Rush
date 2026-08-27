@@ -2,12 +2,14 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 const scoreElement = document.getElementById("score");
+const livesElement = document.getElementById("lives");
 const pauseButton = document.getElementById("pauseButton");
 
 const leftButton = document.getElementById("leftButton");
 const rightButton = document.getElementById("rightButton");
 
 let score = 0;
+let lives = 3;
 let gameOver = false;
 let paused = false;
 
@@ -27,6 +29,17 @@ let roadOffset = 0;
 
 
 // =========================
+// LEVENS
+// =========================
+
+function updateLives() {
+
+  livesElement.textContent = "❤️".repeat(lives);
+
+}
+
+
+// =========================
 // PC BESTURING
 // =========================
 
@@ -34,7 +47,6 @@ document.addEventListener("keydown", function(e) {
 
   keys[e.key.toLowerCase()] = true;
 
-  // Spatie = pauze
   if (e.code === "Space") {
     e.preventDefault();
     togglePause();
@@ -83,7 +95,6 @@ function togglePause() {
 function startLeft(e) {
 
   e.preventDefault();
-
   keys["mobileleft"] = true;
 
 }
@@ -91,7 +102,6 @@ function startLeft(e) {
 function stopLeft(e) {
 
   e.preventDefault();
-
   keys["mobileleft"] = false;
 
 }
@@ -99,7 +109,6 @@ function stopLeft(e) {
 function startRight(e) {
 
   e.preventDefault();
-
   keys["mobileright"] = true;
 
 }
@@ -107,13 +116,11 @@ function startRight(e) {
 function stopRight(e) {
 
   e.preventDefault();
-
   keys["mobileright"] = false;
 
 }
 
 
-// Linker knop
 leftButton.addEventListener("touchstart", startLeft);
 leftButton.addEventListener("touchend", stopLeft);
 leftButton.addEventListener("touchcancel", stopLeft);
@@ -123,7 +130,6 @@ leftButton.addEventListener("mouseup", stopLeft);
 leftButton.addEventListener("mouseleave", stopLeft);
 
 
-// Rechter knop
 rightButton.addEventListener("touchstart", startRight);
 rightButton.addEventListener("touchend", stopRight);
 rightButton.addEventListener("touchcancel", stopRight);
@@ -168,14 +174,46 @@ function collision(a, b) {
   return (
 
     a.x < b.x + b.width &&
-
     a.x + a.width > b.x &&
-
     a.y < b.y + b.height &&
-
     a.y + a.height > b.y
 
   );
+
+}
+
+
+// =========================
+// LEVEN VERLIEZEN
+// =========================
+
+function loseLife(enemyIndex) {
+
+  lives--;
+
+  updateLives();
+
+  enemies.splice(enemyIndex, 1);
+
+  // Speler terug naar het midden
+  player.x = 180;
+
+  if (lives <= 0) {
+
+    gameOver = true;
+
+    setTimeout(function() {
+
+      alert(
+        "💥 GAME OVER!\n\nScore: " +
+        score
+      );
+
+      location.reload();
+
+    }, 100);
+
+  }
 
 }
 
@@ -186,7 +224,6 @@ function collision(a, b) {
 
 function drawCar(car, color) {
 
-  // Schaduw
   ctx.fillStyle = "rgba(0,0,0,0.4)";
 
   ctx.fillRect(
@@ -196,8 +233,6 @@ function drawCar(car, color) {
     car.height
   );
 
-
-  // Auto
   ctx.fillStyle = color;
 
   ctx.fillRect(
@@ -207,8 +242,6 @@ function drawCar(car, color) {
     car.height
   );
 
-
-  // Voorruit
   ctx.fillStyle = "#111";
 
   ctx.fillRect(
@@ -218,8 +251,6 @@ function drawCar(car, color) {
     20
   );
 
-
-  // Achterruit
   ctx.fillRect(
     car.x + 7,
     car.y + 40,
@@ -227,8 +258,6 @@ function drawCar(car, color) {
     15
   );
 
-
-  // Wielen
   ctx.fillStyle = "#000";
 
   ctx.fillRect(
@@ -268,7 +297,6 @@ function drawCar(car, color) {
 
 function drawRoad() {
 
-  // Gras
   ctx.fillStyle = "#198a35";
 
   ctx.fillRect(
@@ -278,8 +306,6 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Weg
   ctx.fillStyle = "#3d3d3d";
 
   ctx.fillRect(
@@ -289,8 +315,6 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Witte randen
   ctx.fillStyle = "white";
 
   ctx.fillRect(
@@ -307,22 +331,15 @@ function drawRoad() {
     canvas.height
   );
 
-
-  // Middenstrepen
   ctx.fillStyle = "white";
 
   if (!paused) {
-
     roadOffset += 7;
-
   }
 
   if (roadOffset >= 60) {
-
     roadOffset = 0;
-
   }
-
 
   for (
     let y = -60 + roadOffset;
@@ -349,13 +366,9 @@ function drawRoad() {
 function update() {
 
   if (gameOver || paused) {
-
     return;
-
   }
 
-
-  // Links op PC
   if (
     keys["arrowleft"] ||
     keys["a"] ||
@@ -366,8 +379,6 @@ function update() {
 
   }
 
-
-  // Rechts op PC
   if (
     keys["arrowright"] ||
     keys["d"] ||
@@ -378,22 +389,14 @@ function update() {
 
   }
 
-
-  // Auto binnen de weg houden
   if (player.x < 45) {
-
     player.x = 45;
-
   }
 
   if (player.x > 315) {
-
     player.x = 315;
-
   }
 
-
-  // Vijanden spawnen
   spawnTimer++;
 
   if (spawnTimer > 60) {
@@ -404,8 +407,6 @@ function update() {
 
   }
 
-
-  // Vijanden bewegen
   for (
     let i = enemies.length - 1;
     i >= 0;
@@ -416,29 +417,15 @@ function update() {
 
     enemy.y += enemy.speed;
 
-
     // Botsing
     if (collision(player, enemy)) {
 
-      gameOver = true;
-
-      setTimeout(function() {
-
-        alert(
-          "💥 GAME OVER!\n\nScore: " +
-          score
-        );
-
-        location.reload();
-
-      }, 100);
+      loseLife(i);
 
       return;
 
     }
 
-
-    // Vijand voorbij
     if (enemy.y > canvas.height) {
 
       enemies.splice(i, 1);
@@ -468,11 +455,8 @@ function draw() {
     canvas.height
   );
 
-
   drawRoad();
 
-
-  // Vijanden
   enemies.forEach(function(enemy) {
 
     drawCar(
@@ -482,8 +466,6 @@ function draw() {
 
   });
 
-
-  // Speler
   drawCar(
     player,
     "#00e676"
@@ -506,7 +488,6 @@ function draw() {
       canvas.height
     );
 
-
     ctx.fillStyle = "white";
 
     ctx.font =
@@ -520,7 +501,6 @@ function draw() {
       280
     );
 
-
     ctx.font =
       "20px Arial";
 
@@ -529,7 +509,6 @@ function draw() {
       canvas.width / 2,
       325
     );
-
 
     ctx.textAlign = "left";
 
@@ -558,5 +537,7 @@ function gameLoop() {
 // =========================
 // START
 // =========================
+
+updateLives();
 
 gameLoop();
